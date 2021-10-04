@@ -49,13 +49,14 @@ Este sera el protocolo de la capa de aplicación sobre la cual debe correr el pr
   
 ---
 ## Checklist ##
+- [ ] Implementar clase SocketTCP.
+- [ ] Implementar clase SAWTP. (Recordar que va sobre UDP, aca es donde se usan los sockets estandar)
+- [ ] Implementar clase GBNTP. (Recordar que va sobre UDP, aca es donde se usan los sockets estandar)
+- [ ] Implementar clase SocketUDP.
 - [ ] Implementar clase ClientFTP.
 - [ ] Implementar clase ServerFTP.
-- [ ] Implementar clase SocketTCP.
-- [ ] Implementar clase SocketUDP.
-- [ ] Implementar clase SAWTP.
-- [ ] Implementar clase GBNTP.
 - [ ] Implementar clase StartServer.
 - [ ] Implementar clase UploadFile.
 - [ ] Implementar clase DownLoadFile.
 - [ ] Crear 3 programas llamados start-server, upload-file y download-file con un *"main"* usando las clases StartServer, UpdloadFile y DownLoadFile.
+- [ ] Por último cuando todo funcione, agregamos varios clientes para hacerla multithreading.
