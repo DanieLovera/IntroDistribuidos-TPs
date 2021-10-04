@@ -1,12 +1,17 @@
-import socket
+import os
+import sys
 
+script_dir = os.path.dirname(__file__)
+mymodule_dir = os.path.join(script_dir, '..', 'common')
+sys.path.append(mymodule_dir)
+from socket_tcp import SocketTCP
 
 if __name__ == "__main__":
     HOST = "localhost"
     PORT = 7777
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as peer:
-        peer.connect((HOST, PORT))
-        peer.sendall(b"Hola soy tu cliente!")
+    with SocketTCP() as peer:
+        peer.connect(HOST, PORT)
+        peer.send(b"Hola soy tu cliente!")
         data = peer.recv(1024)
     print('Received', data)

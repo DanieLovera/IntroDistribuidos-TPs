@@ -1,20 +1,23 @@
-import socket
+import os
+import sys
 
+script_dir = os.path.dirname(__file__)
+mymodule_dir = os.path.join(script_dir, '..', 'common')
+sys.path.append(mymodule_dir)
+from socket_tcp import SocketTCP
 
 if __name__ == "__main__":
     HOST = "localhost"
     PORT = 7777
     MAX_CONNECTIONS = 10
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
-        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        listener.bind((HOST, PORT))
+    with SocketTCP() as listener:
+        listener.bind(HOST, PORT)
         listener.listen(MAX_CONNECTIONS)
-        peer, ret_address = listener.accept()
+        peer = listener.accept()
         with peer:
-            # print('Connected by', ret_address)
             data = peer.recv(1024)
             while data:
                 print('Received', data)
-                peer.sendall(b"Hola soy tu servidor!")
+                peer.send(b"Hola soy tu servidor!")
                 data = peer.recv(1024)
