@@ -52,7 +52,7 @@ Este sera el protocolo de la capa de aplicación sobre la cual debe correr el pr
 - [x] Implementar clase SocketTCP.
 - [ ] Implementar clase SAWTP. (Recordar que va sobre UDP, aca es donde se usan los sockets estandar)
 - [ ] Implementar clase GBNTP. (Recordar que va sobre UDP, aca es donde se usan los sockets estandar)
-- [ ] Implementar clase SocketUDP.
+- [x] Implementar clase SocketUDP.
 - [ ] Implementar clase ClientFTP.
 - [ ] Implementar clase ServerFTP.
 - [ ] Implementar clase StartServer.
