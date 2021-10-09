@@ -7,11 +7,5 @@ sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
 
 if __name__ == "__main__":
-    HOST = "localhost"
-    PORT = 7777
-
-    with SocketTCP() as peer:
-        peer.connect(HOST, PORT)
-        peer.send(b"Hola soy tu cliente!")
-        data = peer.recv(1024)
-    print('Received', data)
+    print("main real... deberian ser dos")
+    print("upload file y download file")
