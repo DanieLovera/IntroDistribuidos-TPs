@@ -1,34 +1,35 @@
 import struct
 from socket_interface import ISocket
 
+
 class CommProtocol:
 	FORMAT = "i"
 
 	def __init__(self, socket: ISocket):
 		""" Constructor
 
-        :param socket: recibe un socket
-        :type socket: ISocket
+		:param socket: recibe un socket
+		:type socket: ISocket
 
-        """
+		"""
 		self.socket = socket
 
 	def send(self, data: bytes):
 		""" Envia un stream datos
 
-        :param data: datos a enviar
-        :type data: bytes
+		:param data: datos a enviar
+		:type data: bytes
 
-        """
+		"""
 		self.__send_size(len(data))
 		self.__send_chunk(data)
 
 	def recv(self):
 		""" Recibe un stream de datos
 
-        :returns: devuelve el stream de datos leido
+		:returns: devuelve el stream de datos leido
 
-        """
+		"""
 		size = self.__recv_size()
 		data = self.__recv_chunk(size)
 		return data
@@ -37,10 +38,10 @@ class CommProtocol:
 		""" Envia una longitud fija de bytes con el tamanio
 		de los datos a enviar.
 
-        :param data_size: tamanio de los datos a enviar
-        :type data_size: int
+		:param data_size: tamanio de los datos a enviar
+		:type data_size: int
 
-        """
+		"""
 		data_size = self.socket.htonl(data_size)
 		data_size = struct.pack(self.FORMAT, data_size)
 		self.socket.send(data_size)
@@ -48,18 +49,18 @@ class CommProtocol:
 	def __send_chunk(self, data: bytes):
 		""" Envia un chunk de datos
 
-        :param data: datos a enviar
+		:param data: datos a enviar
 
-        """
+		"""
 		self.socket.send(data)
 
 	def __recv_size(self):
 		""" Recibe una longitud fija de bytes con el tamanio
 		del stream de datos que tiene que recibir.
 
-        :returns: devuelve el tamanio de los datos a recibir
+		:returns: devuelve el tamanio de los datos a recibir
 
-        """
+		"""
 		fixed_length = struct.calcsize(self.FORMAT)
 		data_size = self.socket.recv(fixed_length)
 		data_size = struct.unpack("i", data_size)[0]
@@ -69,8 +70,8 @@ class CommProtocol:
 	def __recv_chunk(self, bufsize):
 		""" Recibe un chunk de datos
 
-        :returns: devuelve los datos reales enviados por send
+		:returns: devuelve los datos reales enviados por send
 
-        """
+		"""
 		chunk = self.socket.recv(bufsize)
 		return chunk
