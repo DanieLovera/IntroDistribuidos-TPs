@@ -30,7 +30,7 @@ class ClientFTP:
 	def upload_file(self, file):
 		self.__send_opcode(Opcode.UPLOAD)
 		self.__send_fname(file)
-		self.__send_file(file) # ERROR
+		self.__send_file(file)
 		self.__send_opcode(Opcode.EOF)
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
@@ -58,7 +58,7 @@ class ClientFTP:
 
 	def __send_chunk(self, chunk: bytes):
 		self.__send_opcode(Opcode.NEOF)
-		self.commProtocol.send(chunk) # ACA HAY UN ERROR
+		self.commProtocol.send(chunk)
 
 	def __send_file(self, file):
 		chunk = file.read(self.CHUNK_SIZE)

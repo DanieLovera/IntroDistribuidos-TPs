@@ -21,7 +21,7 @@ if __name__ == "__main__":
         ftp = ClientFTP(peer)
 
         with open(LOAD_PATH, "rb") as file:
-           ftp.upload_file(file) # 2 caracteres upload
+           ftp.upload_file(file)
         
         #with open(STORE_PATH, "wb") as file:
         #    ftp.download_file(file)

@@ -63,7 +63,6 @@ class CommProtocol:
 		"""
 		fixed_length = struct.calcsize(self.FORMAT)
 		data_size = self.socket.recv(fixed_length)
-		print(data_size)
 		if data_size:
 			data_size = struct.unpack(self.FORMAT, data_size)[0]
 			data_size = self.socket.ntohl(data_size)

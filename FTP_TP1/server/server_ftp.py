@@ -63,9 +63,8 @@ class ServerFTP:
 
 	def __recv_file(self, file):
 		sopcode = self.__recv_opcode()
-		while sopcode is not Opcode.EOF:
+		while sopcode != Opcode.EOF:
 			chunk = self.commProtocol.recv()
-			#if not chunk:	break
 			file.write(chunk)
 			sopcode = self.__recv_opcode()
 
