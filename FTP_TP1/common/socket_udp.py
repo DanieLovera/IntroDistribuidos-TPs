@@ -1,13 +1,17 @@
 import socket
+from socket_interface import ISocket
 
-class SocketUDP:
 
-    def __init__(self):
+class SocketUDP(ISocket):
+
+    def __init__(self, host, port):
+        self.__peer = None
+        self.__host = host
+        self.__port = port
+
+    def __enter__(self):
         self.__peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    #def __enter__(self):
-       # self.__peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-       # return self
+        return self
 
     def __exit__(self, exc_type, exc_value, tb):
         self.close()
@@ -16,15 +20,15 @@ class SocketUDP:
         if not self.__peer:
             self.close()
 
-    def sendto(self, data: bytes, address):
-        self.__peer.sendto(data, address)
+    def send(self, data: bytes):
+        self.__peer.sendto(data, (self.__host, self.__port))
 
     def recvfrom(self, bufsize: int):
         data, source = self.__peer.recvfrom(bufsize)
         return data, source
 
-    def bind(self, host, port):
-        self.__peer.bind((host, port))
+    def bind(self):
+        self.__peer.bind((self.__host, self.__port))
 
     def close(self):
         self.__peer.close()
