@@ -17,69 +17,24 @@ class Opcode(enum.IntEnum):
 	#LISTAR = 4
 	#CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
-
 class ServerFTP:
 	FORMAT = "h"
+	CHUNK_SIZE = 1024
 
 	def __init__(self, socket: ISocket):
 		self.socket = socket
 		self.commProtocol = CommProtocol(socket)
 
-
-	# oo handle_request(self, store_path)
-	def recv_request(self, store_path):
-		# opcode = self.recv_opcode()
-		# if (opcode == Opcode.UPLOAD):
-		#	 file_name = self.commProtocol.recv()
-		#
-		#	 path = ruta store + filename
-		#	 file = openfile(path, "wb")
-		#	 request = StoreRequest(file)
-		# 	 oooo... downloadfile(file)
-		#
-		# else if (opcode == Opcode.DOWNLOAD):
-		#	 file_name = self.commProtocol.recv()
-		#
-		#	 path = ruta store + filename
-		#	 file = openfile(path, "rb")
-		#	 request = LoadRequest(file)
-		#    oooo... uploadfile(file) 
-		#
-		# else if (opcode == Opcode.LIST): 
-		# 	 enviar todos los documentos en el store path
-		#
-		#return request 
-
-	def __upload_file(self, file):
-		file_name = self.commProtocol.recv()
-		# Logica para enviar datos del archivo
-		# a medida se va leyendo, siempre tiene que enviar otro
-		# mensaje adicional ademas de los datos para que indique fin de archivo.
-
-		# while (!file(eof)) {
-		# 	self.__send_opcode(Opcode.NEOF)
-		#
-		#	----- Logica para leer data de file -----
-		#
-		#   self.commProtocol.send(data)
-		# }
-		# self.__send_opcode(Opcode.EOF)
-
-	def __download_file(self, file):
-		file_name = self.commProtocol.recv()
-		# Logica para recibir datos del servidor y guardarlos
-		# en el archivo a medida se va leyendo pero tambien
-		# debera ir recibiendo siempre bytes fijos para verificar
-		# fin de archivo.
-
-		# sopcode = self.__recv_opcode()
-		# while (sopcode != Opcode.EOF) {
-		#	data = self.commProtocol.recv()
-		#
-		# 	----- Logica para escribir data sobre file -----
-		#
-		#	sopcode = self.__recv_opcode() # vuelvo a recibir opcode
-		# }
+	def handle_request(self, store_path: str):
+		opcode = self.recv_opcode()
+		if (opcode is Opcode.UPLOAD):
+			self.__handle_upload_request(store_path)
+		
+		else if (opcode == Opcode.DOWNLOAD):
+			self.__handle_download_request(store_path)
+		
+		#else if (opcode == Opcode.LIST): 
+		# 	self.__handle_list_request(store_path)
 
 	def __send_opcode(self, opcode: Opcode):
 		sopcode = int(opcode)
@@ -92,3 +47,39 @@ class ServerFTP:
 		sopcode = struct.unpack(self.FORMAT, sopcode)[0]
 		sopcode = self.socket.ntohs(sopcode)
 		return sopcode
+
+	def __recv_fname(self):
+		fname = self.commProtocol.recv()
+		decoded_fname = fname.decode()
+		return decoded_fname
+
+	def __send_chunk(self, chunk: bytes):
+		self.__send_opcode(Opcode.NEOF)
+		self.commProtocol.send(data)
+
+	def __send_file(self, file):
+		chunk = file.read(self.CHUNK_SIZE)
+		while chunk:
+			self.__send_chunk(chunk)
+			chunk = file.read(self.CHUNK_SIZE)
+
+	def __recv_file(self, file):
+		sopcode = self.__recv_opcode()
+		while sopcode is not Opcode.EOF:
+			chunk = self.commProtocol.recv()
+			# if not chunk:	break
+			file.write(chunk)
+			sopcode = self.__recv_opcode()
+
+	def __handle_upload_request(self, store_path: str):
+		fname = self.__recv_fname()
+		path = store_path + "/" + fname
+		with open(path, "wb") as file:
+			self.__recv_file(file)
+
+	def __handle_download_request(self, store_path: str):
+		fname = self.__recv_fname()
+		path = store_path + "/" + fname
+		with open(path, "rb") as file:
+			self.__send_file(file)
+			self.__send_opcode(Opcode.EOF)

@@ -14,47 +14,29 @@ class Opcode(enum.IntEnum):
 	DOWNLOAD = 1
 	EOF = 2
 	NEOF = 3
+	#LISTAR = 4
 	#CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
 class ClientFTP:
 	FORMAT = "h"
+	CHUNK_SIZE = 1024
 
 	def __init__(self, socket: ISocket):
 		self.socket = socket
 		self.commProtocol = CommProtocol(socket)
 
-	def upload_file(self, file, file_name):
+	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA LECTURA!
+	def upload_file(self, file):
 		self.__send_opcode(Opcode.UPLOAD)
-		self.commProtocol.send(file_name)
-		# Logica para enviar datos del archivo
-		# a medida se va leyendo, siempre tiene que enviar otro
-		# mensaje adicional ademas de los datos para que indique fin de archivo.
+		self.__send_fname(file)
+		self.__send_file(file)
+		self.__send_opcode(Opcode.EOF)
 
-		# while (!file(eof)) {
-		# 	self.__send_opcode(Opcode.NEOF)
-		#
-		#	----- Logica para leer data de file -----
-		#
-		#   self.commProtocol.send(data)
-		# }
-		# self.__send_opcode(Opcode.EOF)
-
-	def download_file(self, file, file_name):
+	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
+	def download_file(self, file):
 		self.__send_opcode(Opcode.DOWNLOAD)
-		self.commProtocol.send(file_name)
-		# Logica para recibir datos del servidor y guardarlos
-		# en el archivo a medida se va leyendo pero tambien
-		# debera ir recibiendo siempre bytes fijos para verificar
-		# fin de archivo.
-
-		# sopcode = self.__recv_opcode()
-		# while (sopcode != Opcode.EOF) {
-		#	data = self.commProtocol.recv()
-		#
-		# 	----- Logica para escribir data sobre file -----
-		#
-		#	sopcode = self.__recv_opcode() # vuelvo a recibir opcode
-		# }
+		self.__send_fname(file)
+		self.__recv_file(file)
 
 	def __send_opcode(self, opcode: Opcode):
 		sopcode = int(opcode)
@@ -67,3 +49,26 @@ class ClientFTP:
 		sopcode = struct.unpack(self.FORMAT, sopcode)[0]
 		sopcode = self.socket.ntohs(sopcode)
 		return sopcode
+
+	def __send_fname(self, file):
+		fname = os.path.basename(file.name)
+		encoded_fname = fname.encode()
+		self.commProtocol.send(encoded_fname)
+
+	def __send_chunk(self, chunk: bytes):
+		self.__send_opcode(Opcode.NEOF)
+		self.commProtocol.send(data)
+
+	def __send_file(self, file):
+		chunk = file.read(self.CHUNK_SIZE)
+		while chunk:
+			self.__send_chunk(chunk)
+			chunk = file.read(self.CHUNK_SIZE)
+
+	def __recv_file(self, file):
+		sopcode = self.__recv_opcode()
+		while sopcode is not Opcode.EOF:
+			chunk = self.commProtocol.recv()
+			# if not chunk:	break
+			file.write(chunk)
+			sopcode = self.__recv_opcode()

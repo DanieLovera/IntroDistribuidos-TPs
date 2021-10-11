@@ -117,4 +117,7 @@ class SocketTCP(ISocket):
                 break
             remaining_bytes -= len(received_stream)
             data.extend(received_stream)
-        return bytes(data) # si len(bytes) = 0, casi seguro es por cierre de socket en un extremo
+        return bytes(data)
+        # OJO CON ESTA PARTE PUEDE SER CAUSA DE ERROR
+        # EN TEORIA DEVERIA DEVOLER UN OBJETO BYTES VACIO
+        # SI SE CIERRA LA CONEXION DE UN EXTREMO

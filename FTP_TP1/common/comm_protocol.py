@@ -27,7 +27,7 @@ class CommProtocol:
 	def recv(self):
 		""" Recibe un stream de datos
 
-		:returns: devuelve el stream de datos leido
+		:returns: devuelve el stream de datos leido en forma de bytes
 
 		"""
 		size = self.__recv_size()

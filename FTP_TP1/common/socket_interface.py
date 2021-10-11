@@ -20,6 +20,7 @@ class ISocket(abc.ABC):
 
 		:param bufsize: cantidad de datos a recibir
 		:type bufsize: int
+		:returns: los datos recibidos en forma de bytes
 
 		"""
 		pass
@@ -28,6 +29,7 @@ class ISocket(abc.ABC):
 		""" Transforma endiannes local al de la red
 
 		:param x: entero de 4 bytes
+		:returns: devuelve el entero x en endiannes de la red
 
 		"""
 		return socket.htonl(x)
@@ -36,6 +38,7 @@ class ISocket(abc.ABC):
 		""" Transforma endiannes de la red a local
 
 		:param x: entero de 4 bytes
+		:returns: devuelve el entero x en endiannes local
 
 		"""
 		return socket.ntohl(x)
@@ -44,6 +47,7 @@ class ISocket(abc.ABC):
 		""" Transforma endiannes local al de la red
 
 		:param x: entero de 2 bytes
+		:returns: devuelve el entero x en endiannes de la red
 
 		"""
 		return socket.htons(x)
@@ -52,6 +56,7 @@ class ISocket(abc.ABC):
 		""" Transforma endiannes de la red a local
 
 		:param x: entero de 2 bytes
+		:returns: devuelve el entero x en endiannes local
 
 		"""
 		return socket.ntohs(x)
