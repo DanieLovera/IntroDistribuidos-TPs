@@ -7,6 +7,7 @@ script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from comm_protocol import CommProtocol
+from socket_interface import ISocket
 
 @enum.unique
 class Opcode(enum.IntEnum):
@@ -18,7 +19,7 @@ class Opcode(enum.IntEnum):
 	#CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
 class ServerFTP:
-	FORMAT = "h"
+	FORMAT = "H"
 	CHUNK_SIZE = 1024
 
 	def __init__(self, socket: ISocket):
@@ -26,15 +27,12 @@ class ServerFTP:
 		self.commProtocol = CommProtocol(socket)
 
 	def handle_request(self, store_path: str):
-		opcode = self.recv_opcode()
-		if (opcode is Opcode.UPLOAD):
+		opcode = self.__recv_opcode()
+		if (opcode == Opcode.UPLOAD):
 			self.__handle_upload_request(store_path)
 		
-		else if (opcode == Opcode.DOWNLOAD):
+		elif (opcode == Opcode.DOWNLOAD):
 			self.__handle_download_request(store_path)
-		
-		#else if (opcode == Opcode.LIST): 
-		# 	self.__handle_list_request(store_path)
 
 	def __send_opcode(self, opcode: Opcode):
 		sopcode = int(opcode)
@@ -55,7 +53,7 @@ class ServerFTP:
 
 	def __send_chunk(self, chunk: bytes):
 		self.__send_opcode(Opcode.NEOF)
-		self.commProtocol.send(data)
+		self.commProtocol.send(chunk)
 
 	def __send_file(self, file):
 		chunk = file.read(self.CHUNK_SIZE)
@@ -83,3 +81,7 @@ class ServerFTP:
 		with open(path, "rb") as file:
 			self.__send_file(file)
 			self.__send_opcode(Opcode.EOF)
+
+		
+		#else if (opcode == Opcode.LIST): 
+		# 	self.__handle_list_request(store_path)

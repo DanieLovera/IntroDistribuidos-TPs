@@ -1,13 +1,11 @@
 import os
 import sys
-from server_ftp.py import ServerFTP
+from server_ftp import ServerFTP
 
 script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
-from socket_interface import ISocket
-from comm_protocol import CommProtocol
 
 if __name__ == "__main__":
 
@@ -24,6 +22,6 @@ if __name__ == "__main__":
             ftp = ServerFTP(peer)
             ftp.handle_request(STORE_PATH)
 
-    with SocketUDP() as socket:
-        ftp = ServerFTP(socket)
-        ftp.handle_request(STORE_PATH)
+    #with SocketUDP() as socket:
+    #    ftp = ServerFTP(socket)
+    #    ftp.handle_request(STORE_PATH)

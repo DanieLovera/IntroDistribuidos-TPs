@@ -41,6 +41,7 @@ class ISocket(abc.ABC):
 		:returns: devuelve el entero x en endiannes local
 
 		"""
+		#print(socket.ntohl(x))
 		return socket.ntohl(x)
 
 	def htons(self, x):

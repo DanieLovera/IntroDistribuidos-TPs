@@ -3,7 +3,7 @@ from socket_interface import ISocket
 
 
 class CommProtocol:
-	FORMAT = "i"
+	FORMAT = "I"
 
 	def __init__(self, socket: ISocket):
 		""" Constructor
@@ -22,6 +22,7 @@ class CommProtocol:
 
 		"""
 		self.__send_size(len(data))
+		print(len(data))
 		self.__send_chunk(data)
 
 	def recv(self):
