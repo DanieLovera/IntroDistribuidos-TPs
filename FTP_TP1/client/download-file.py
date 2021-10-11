@@ -1,10 +1,12 @@
 import os
 import sys
 import argparse
+from client_ftp import ClientFTP
 
 script_dir = os.path.dirname(__file__)
 myModule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(myModule_dir)
+from socket_tcp import SocketTCP
 
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
@@ -26,61 +28,33 @@ def parseArguments(parser):
                         required=False, help='server port')
 
     parser.add_argument('-d', '--dst', type=str, default='./downloads',
-                        required=True, help='destination file path',
+                        required=False, help='destination file path',
                         dest='filepath')
 
     parser.add_argument('-n', '--name', type=str, default='archivo',
-                        required=False, help='file name', dest='filename')
+                        required=True, help='file name', dest='filename')
 
 
 def main():
     parser = argparse.ArgumentParser(description='Solicita y recibe un archivo del servidor')
-
     parseArguments(parser)
     args = parser.parse_args()
 
-    # Para testear la escritura
-    file = open("testText.txt", "r")
-    content = file.read()
-    file.close()
+    fname = args.filename
+    host = args.addr
+    port = args.port
 
-    """
-    Del llamado recibo el nombre del archivo. 
-    la direccion donde va a ser guardado.  
-    el puerto a conectarme 
-    y el host
-    """
-
-    # Verifico si existe el path
-    fileDir = os.path.dirname(args.filepath)
-    pathExist = os.path.exists(fileDir)
-
-    # Si no existe lo creo
+    fpath = args.filepath
+    pathExist = os.path.exists(fpath)
     if not pathExist:
-        os.makedirs(fileDir)
+        os.makedirs(fpath)
 
+    with SocketTCP() as peer:
+        peer.connect(host, port)
+        ftp = ClientFTP(peer)
 
-    # conexion con el ftp client
-
-    # fileTransferProtocol = FTP()
-    # haceme el download del archivo x
-    # fileTransferProtocol.sendAll(args.name)
-
-    # with SocketTCP() as peer:
-    #    # peer.connect(args.host, args.port)
-    #    with open(args.filepath, 'w') as downloadedFile:
-    #        for line in peer.recv(data):
-    #            downloadedFile.write(str(line))
-
-
-
-    # codigo de prueba de funcionalidad
-    # leemos un archivo linea a linea y lo escribimos en el directorio
-    with open(args.filepath, 'w') as downloadedFile:
-        for data in content:
-            downloadedFile.write(str(data))
-            #print(data)
-
+        with open((fpath + "/" + fname), "wb") as file:
+            ftp.download_file(file, fname)
 
 if __name__ == "__main__":
     main()
