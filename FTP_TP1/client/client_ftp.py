@@ -70,6 +70,6 @@ class ClientFTP:
 		sopcode = self.__recv_opcode()
 		while sopcode is not Opcode.EOF:
 			chunk = self.commProtocol.recv()
-			# if not chunk:	break
+			#if not chunk:	break
 			file.write(chunk)
 			sopcode = self.__recv_opcode()

@@ -22,7 +22,6 @@ class CommProtocol:
 
 		"""
 		self.__send_size(len(data))
-		print(len(data))
 		self.__send_chunk(data)
 
 	def recv(self):
@@ -64,8 +63,11 @@ class CommProtocol:
 		"""
 		fixed_length = struct.calcsize(self.FORMAT)
 		data_size = self.socket.recv(fixed_length)
-		data_size = struct.unpack("i", data_size)[0] # self.FORMAT
-		data_size = self.socket.ntohl(data_size)
+		print(data_size)
+		if data_size:
+			data_size = struct.unpack(self.FORMAT, data_size)[0]
+			data_size = self.socket.ntohl(data_size)
+
 		return data_size
 
 	def __recv_chunk(self, bufsize):
