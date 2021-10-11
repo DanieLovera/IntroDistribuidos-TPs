@@ -1,20 +1,12 @@
 import os
 import sys
 import argparse
+from client_ftp import ClientFTP
 
 script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
-
-
-def openFile(filename):
-    file = open(filename, "rb")
-    content = file.read()
-    file.close()
-
-    return content
-
 
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
@@ -49,23 +41,17 @@ def main():
                                      ' con el nombre asignado')
     parseArguments(parser)
     args = parser.parse_args()
+    host = args.addr
+    port = args.port
+    fpath = args.filepath
+    fname = args.filename
 
-    try:
-        fileContent = openFile(args.filepath)
-    except FileNotFoundError:
-        print("No existe el archivo solicitado.")
-        return
+    with SocketTCP() as peer:
+        peer.connect(host, port)
+        ftp = ClientFTP(peer)
 
-    print(fileContent)
-    print(len(fileContent))
-    # fileTransferProtocol = FTP()
-    # fileTransferProtocol.sendFile(args.name, fileContent)
-
-    # with SocketTCP() as peer:
-        # peer.connect(args.host, args.port)
-        # peer.send(fileContent)
-    # print("Envie el archivo")
-
+        with open(fpath, "rb") as file:
+            ftp.upload_file(file, fname)
 
 if __name__ == "__main__":
     main()
