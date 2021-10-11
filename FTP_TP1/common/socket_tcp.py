@@ -1,7 +1,8 @@
 import socket
+from socket_interface import ISocket
 
 
-class SocketTCP:
+class SocketTCP(ISocket):
     SHUT_RD = socket.SHUT_RD
     SHUT_WR = socket.SHUT_WR
     SHUT_RDWR = socket.SHUT_RDWR
@@ -50,7 +51,7 @@ class SocketTCP:
     def recv(self, bufsize: int):
         """ Recibe un stream de bytes de tamanio bufsize.
 
-        :param host: dominio destino
+        :param bufsize: tamanio del stream a recibir
         :type bufsize: int
         :returns: devuelve un stream de bytes con el contenido recibido
 
@@ -101,6 +102,13 @@ class SocketTCP:
         self.__peer.close()
 
     def __recvall(self, bufsize: int):
+        """ Recibe todos los bytes esperados segun bufsize
+
+        :param bufsize: tamanio del stream a recibir
+        :type bufsize: int
+        :returns: devuelve un stream de bytes con el contenido recibido
+
+        """
         data = bytearray()
         remaining_bytes = bufsize
         while (remaining_bytes > 0):
@@ -109,4 +117,7 @@ class SocketTCP:
                 break
             remaining_bytes -= len(received_stream)
             data.extend(received_stream)
-        return data
+        return bytes(data)
+        # OJO CON ESTA PARTE PUEDE SER CAUSA DE ERROR
+        # EN TEORIA DEVERIA DEVOLER UN OBJETO BYTES VACIO
+        # SI SE CIERRA LA CONEXION DE UN EXTREMO
