@@ -20,8 +20,8 @@ if __name__ == "__main__":
         peer.connect(HOST, PORT)
         ftp = ClientFTP(peer)
 
-        with open(LOAD_PATH, "rb") as file:
-           ftp.upload_file(file)
+        #with open(LOAD_PATH, "rb") as file:
+        #   ftp.upload_file(file, "caca.txt")
         
-        #with open(STORE_PATH, "wb") as file:
-        #    ftp.download_file(file)
+        with open(STORE_PATH, "wb") as file:
+           ftp.download_file(file, "caca.txt")

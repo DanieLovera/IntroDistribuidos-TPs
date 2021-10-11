@@ -81,6 +81,5 @@ class ServerFTP:
 			self.__send_file(file)
 			self.__send_opcode(Opcode.EOF)
 
-		
 		#else if (opcode == Opcode.LIST): 
 		# 	self.__handle_list_request(store_path)

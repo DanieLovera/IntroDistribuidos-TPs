@@ -27,16 +27,16 @@ class ClientFTP:
 		self.commProtocol = CommProtocol(socket)
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA LECTURA!
-	def upload_file(self, file):
+	def upload_file(self, file, fname):
 		self.__send_opcode(Opcode.UPLOAD)
-		self.__send_fname(file)
+		self.__send_fname(fname)
 		self.__send_file(file)
 		self.__send_opcode(Opcode.EOF)
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
-	def download_file(self, file):
+	def download_file(self, file, fname):
 		self.__send_opcode(Opcode.DOWNLOAD)
-		self.__send_fname(file)
+		self.__send_fname(fname)
 		self.__recv_file(file)
 
 	def __send_opcode(self, opcode: Opcode):
@@ -51,8 +51,7 @@ class ClientFTP:
 		sopcode = self.socket.ntohs(sopcode)
 		return sopcode
 
-	def __send_fname(self, file):
-		fname = os.path.basename(file.name)
+	def __send_fname(self, fname):
 		encoded_fname = fname.encode()
 		self.commProtocol.send(encoded_fname)
 
@@ -68,7 +67,7 @@ class ClientFTP:
 
 	def __recv_file(self, file):
 		sopcode = self.__recv_opcode()
-		while sopcode is not Opcode.EOF:
+		while sopcode != Opcode.EOF:
 			chunk = self.commProtocol.recv()
 			#if not chunk:	break
 			file.write(chunk)
