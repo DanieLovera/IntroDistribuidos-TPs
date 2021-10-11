@@ -39,3 +39,19 @@ class ISocket(abc.ABC):
 
 		"""
 		return socket.ntohl(x)
+
+	def htons(self, x):
+		""" Transforma endiannes local al de la red
+
+		:param x: entero de 2 bytes
+
+		"""
+		return socket.htons(x)
+
+	def ntohs(self, x):
+		""" Transforma endiannes de la red a local
+
+		:param x: entero de 2 bytes
+
+		"""
+		return socket.ntohs(x)
