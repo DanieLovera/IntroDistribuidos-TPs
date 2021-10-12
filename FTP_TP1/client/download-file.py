@@ -34,7 +34,6 @@ def parseArguments(parser):
     parser.add_argument('-n', '--name', type=str, default='archivo',
                         required=True, help='file name', dest='filename')
 
-
 def main():
     parser = argparse.ArgumentParser(description='Solicita y recibe un archivo del servidor')
     parseArguments(parser)
