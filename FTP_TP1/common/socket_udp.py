@@ -23,9 +23,9 @@ class SocketUDP(ISocket):
     def send(self, data: bytes):
         self.__peer.sendto(data, (self.__host, self.__port))
 
-    def recvfrom(self, bufsize: int):
+    def recv(self, bufsize: int):
         data, source = self.__peer.recvfrom(bufsize)
-        return data, source
+        return data
 
     def bind(self):
         self.__peer.bind((self.__host, self.__port))
