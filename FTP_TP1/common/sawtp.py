@@ -13,20 +13,24 @@ class Flag(enum.IntEnum):
 	NACK = 1
 
 class SAWTP:
-	PKT_SIZE = 1024
+	PACKET_SIZE = 1024
 	RTT = 100
-	#FORMAT = "!HI{}s".format(PKT_SIZE)
 	FORMAT = "!II" # FLAG|SEQNUM 
 
 	def __init__(self):
-		self.send_seqnum = 0
-		self.recv_seqnum = 0
+		self.sender_seqnum = 0
+		self.receiver_seqnum = 0
+
 		self.format_dict = {Tag.FLAG_ACK: 0,
 							Tag.SEQNUM: 0
 							Tag.DATA: b""}
 
-	def __acknowledged(this, ack, seqnum):
+	def __acknowledged(self, ack, seqnum):
 		return (ack == seqnum)
+
+	def __acknowledge_flag(self):
+		return (self.format_dict[Tag.FLAG_ACK] == FLAG.FLAG_ACK)
+
 
 	def __pack(self, flag_ack, seqnum, data):
 		packet = struct.pack(self.FORMAT, flag_ack, seqnum)
@@ -37,64 +41,45 @@ class SAWTP:
 	def __unpack(self, packet: bytes):
 		header_size = struct.calcsize(FORMAT)
 	    header = struct.unpack(FORMAT, packet[:header_size])
+	    data = packet[header_size:]
 		
-		flag_ack = header[0]
+		"""flag_ack = header[0]
 		recv_seqnum = header[1]
-	    recv_data = packet[header_size:]
 		self.format_dict[Tag.FLAG_ACK] = flag_ack
 		self.format_dict[Tag.SEQNUM] = recv_seqnum
-		self.format_dict[Tag.DATA] = recv_data
+		self.format_dict[Tag.DATA] = recv_data"""
+		return (header, data)
 
 	def send(this, data: bytes):
-		recv_ack = 0
 
-		socket.settimeout(self.RTT)
-		for base in range(0, len(data), PKT_SIZE):
+		for base in range(0, len(data), PACKET_SIZE):
 			# Transmision correcta
-			chunk = data[base:(base + PKT_SIZE)]
-			packet = self.pack(Flag.NACK, self.send_seqnum, chunk)
-
-			start = now()
+			chunk = data[base:(base + PACKET_SIZE)]
+			packet = self.pack(Flag.NACK, sender_seqnum, chunk)
 			socket.sendto(packet)
-			end = now()
-			elapsed = start - end
+			start = now()
 
-			socket.settimeout(self.RTT - elapsed)
-			while not self.__acknowledged(recv_ack, self.recv_seqnum):
+			acknowledged = False
+			while not acknowledged:
 				try:
-					recv_packet = socket.recvfrom(PKT_SIZE)
+					elapsed = now() - start
+					socket.settimeout(self.RTT - elapsed)
+					recv_packet = socket.recvfrom(PACKET_SIZE)
+					header, data = self.unpack(recv_packet)
 
-					format_list = self.unpack(recv_packet)
+					if FLAG.ACK == header[0]:
+						if header[seqnum] == sender_seqnum:
+							continue
 
-
+						sender_seqnum = 1 + sender_seqnum
+						sender_seqnum = sender_seqnum % 2
+						socket.settimeout(None)
+					else:
+						packet = self.pack(Flag.ACK, receiver_seqnum, b"")
 
 				except socket.timeout:
 					socket.sendto(packet)
-
-
-
-
-
-		while (remaining_bytes > 0):			
-			pkt = pack(seqnum, data[base:base+PKT_SIZE])
-			sendto(pkt, (host, port))
-	
-			socket.settimeout(100)
-			while (ack != seqnum):
-				try:
-					pkt = socket.recvfrom(PKT_SIZE)[0]
-					nseq, data = unpack()
-
-				except socket.timeout:
-					sendto(pkt, (host, port))
-
-				if (ack == nseq):
-					pkt = pack(nseq +1, data[base:base+PKT_SIZE])
-					sendto(pkt, (host, port))
-					++next_seqnum
-
-
-
+					start = now()
 
 	def recv(this, buffsize):
 		pass
