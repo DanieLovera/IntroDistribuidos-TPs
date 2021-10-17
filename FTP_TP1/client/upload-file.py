@@ -7,6 +7,8 @@ script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
+from socket_udp import SocketUDP
+
 
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
@@ -34,6 +36,19 @@ def parseArguments(parser):
     parser.add_argument('-n', '--name', type=str, default='archivo',
                         required=False, help='file name', dest='filename')
 
+    transportProtocol = parser.add_mutually_exclusive_group(required=True)
+
+    transportProtocol.add_argument('-t', '--tcp', type=str,
+                                   required=False,
+                                   help='send file over TCP protocol',
+                                   dest='protocol', action='store_const')
+
+    transportProtocol.add_argument('-w', '--saw', type=str,
+                                   required=False,
+                                   help='send file over UDP protocol' +
+                                   '(Stop-and-Wait)',
+                                   dest='protocol', action='store_const')
+
 
 def main():
     parser = argparse.ArgumentParser(description='Envía un archivo al' +
@@ -45,13 +60,7 @@ def main():
     port = args.port
     fpath = args.filepath
     fname = args.filename
-
-    with SocketTCP() as peer:
-        peer.connect(host, port)
-        ftp = ClientFTP(peer)
-
-        with open(fpath, "rb") as file:
-            ftp.upload_file(file, fname)
+    protocol = args.protocol
 
 if __name__ == "__main__":
     main()
