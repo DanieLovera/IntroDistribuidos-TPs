@@ -1,11 +1,11 @@
 import socket
 import struct
 
-@enum.unique
+"""@enum.unique
 class Tag(enum.IntEnum):
 	FLAG_ACK = 0
 	SEQNUM = 1
-	DATA = 2
+	DATA = 2"""
 
 @enum.unique
 class Flag(enum.IntEnum):
@@ -20,16 +20,6 @@ class SAWTP:
 	def __init__(self):
 		self.sender_seqnum = 0
 		self.receiver_seqnum = 0
-
-		self.format_dict = {Tag.FLAG_ACK: 0,
-							Tag.SEQNUM: 0
-							Tag.DATA: b""}
-
-	def __acknowledged(self, ack, seqnum):
-		return (ack == seqnum)
-
-	def __acknowledge_flag(self):
-		return (self.format_dict[Tag.FLAG_ACK] == FLAG.FLAG_ACK)
 
 
 	def __pack(self, flag_ack, seqnum, data):
@@ -51,9 +41,7 @@ class SAWTP:
 		return (header, data)
 
 	def send(this, data: bytes):
-
 		for base in range(0, len(data), PACKET_SIZE):
-			# Transmision correcta
 			chunk = data[base:(base + PACKET_SIZE)]
 			packet = self.pack(Flag.NACK, sender_seqnum, chunk)
 			socket.sendto(packet)
@@ -71,6 +59,7 @@ class SAWTP:
 						if header[seqnum] == sender_seqnum:
 							continue
 
+						acknowledged = True
 						sender_seqnum = 1 + sender_seqnum
 						sender_seqnum = sender_seqnum % 2
 						socket.settimeout(None)
