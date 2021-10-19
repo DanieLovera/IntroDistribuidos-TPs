@@ -13,7 +13,7 @@ socketUDP = SocketUDP()
 
 socketUDP.bind("localhost", serverPort)
 
-message, clientAddress = socketUDP.recvfrom(2048)
+message, clientAddress = socketUDP.recv(2048)
 print(message.decode())
 socketUDP.sendto(message, clientAddress)
 socketUDP.close()

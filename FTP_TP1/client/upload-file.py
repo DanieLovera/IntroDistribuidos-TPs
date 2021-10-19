@@ -7,6 +7,7 @@ script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
+from socket_udp import SocketUDP
 
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
@@ -34,7 +35,6 @@ def parseArguments(parser):
     parser.add_argument('-n', '--name', type=str, default='archivo',
                         required=False, help='file name', dest='filename')
 
-
 def main():
     parser = argparse.ArgumentParser(description='Envía un archivo al' +
                                      ' servidor para ser guardado' +
@@ -46,12 +46,19 @@ def main():
     fpath = args.filepath
     fname = args.filename
 
-    with SocketTCP() as peer:
-        peer.connect(host, port)
+    #with SocketTCP() as peer:
+    #    peer.connect(host, port)
+    #    ftp = ClientFTP(peer)
+
+    #    with open(fpath, "rb") as file:
+    #        ftp.upload_file(file, fname)
+
+    with SocketUDP(host, port) as peer:
         ftp = ClientFTP(peer)
 
         with open(fpath, "rb") as file:
             ftp.upload_file(file, fname)
+
 
 if __name__ == "__main__":
     main()

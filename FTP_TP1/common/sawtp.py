@@ -13,10 +13,12 @@ class SAWTP:
     SEQ_NUM_SIZE = 1
     MAX_DATAGRAM_SIZE = 64 * 1024
 
-    def __init__(self, socket):
+    def __init__(self, socket, host, port):
         self.sender_seqnum = b'0'
         self.receiver_seqnum = b'0'
         self.socket = socket
+        self.__host = host
+        self.__port = port
 
     def __pack(self, seqnum, data: bytearray):
         return seqnum + data
@@ -29,7 +31,7 @@ class SAWTP:
     def send(self, data: bytes):
         _data = bytearray(data)
         pkt = self.__pack(self.sender_seqnum, _data)
-        sent = self.socket.send(pkt)
+        sent = self.socket.sendto(pkt, (self.__host, self.__port))
         start = now()
         acknowledged = False
 
@@ -37,7 +39,7 @@ class SAWTP:
             try:
                 elapsed = now() - start
                 self.socket.settimeout(self.RTT - elapsed)
-                pkt_received = self.socket.recv(self.MAX_DATAGRAM_SIZE)
+                pkt_received, _ = self.socket.recvfrom(self.MAX_DATAGRAM_SIZE)
                 seq_num_received, _ = self.__unpack(pkt_received)
 
                 if seq_num_received == self.sender_seqnum:
@@ -46,21 +48,21 @@ class SAWTP:
                     acknowledged = True
 
             except socket.timeout:
-                sent = self.socket.send(pkt)
+                sent = self.socket.sendto(pkt, (self.__host, self.__port))
                 start = now()
 
         return sent
 
     def recv(self, buffsize):
-        pkt_received = self.socket.recv(buffsize)
+        pkt_received, source = self.socket.recvfrom(64*1024)
         seq_num_received, data_received = self.__unpack(pkt_received)
 
         if seq_num_received == self.receiver_seqnum:
-            pkt = self.__pack(self.receiver_seqnum, bytearray(''))
-            self.socket.send(pkt)
+            pkt = self.__pack(self.receiver_seqnum, b'')
+            self.socket.sendto(pkt, source)
             self.receiver_seqnum = toggled(self.receiver_seqnum)
         else:
-            pkt = self.__pack(toggled(self.receiver_seqnum), bytearray(''))
-            self.socket.send(pkt)
+            pkt = self.__pack(toggled(self.receiver_seqnum), b'')
+            self.socket.sendto(pkt, source)
 
         return data_received
