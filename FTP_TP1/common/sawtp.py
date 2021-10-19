@@ -1,74 +1,66 @@
 import socket
-import struct
+from time import perf_counter as now
 
-"""@enum.unique
-class Tag(enum.IntEnum):
-	FLAG_ACK = 0
-	SEQNUM = 1
-	DATA = 2"""
 
-@enum.unique
-class Flag(enum.IntEnum):
-	ACK = 0
-	NACK = 1
+def toggled(seq_number):
+    if seq_number == b'0':
+        return b'1'
+    return b'0'
+
 
 class SAWTP:
-	PACKET_SIZE = 1024
-	RTT = 100
-	FORMAT = "!II" # FLAG|SEQNUM 
+    RTT = 100
+    SEQ_NUM_SIZE = 1
+    MAX_DATAGRAM_SIZE = 64 * 1024
 
-	def __init__(self):
-		self.sender_seqnum = 0
-		self.receiver_seqnum = 0
+    def __init__(self, socket):
+        self.sender_seqnum = b'0'
+        self.receiver_seqnum = b'0'
+        self.socket = socket
 
+    def __pack(self, seqnum, data: bytearray):
+        return seqnum + data
 
-	def __pack(self, flag_ack, seqnum, data):
-		packet = struct.pack(self.FORMAT, flag_ack, seqnum)
-		packet += data
-		return packet;
+    def __unpack(self, packet: bytearray):
+        seq_num = packet[:self.SEQ_NUM_SIZE]
+        data = packet[self.SEQ_NUM_SIZE:]
+        return seq_num, data
 
-	# OJO QUE DESEMPAQUETO SOLO PARA FORMAT DICT
-	def __unpack(self, packet: bytes):
-		header_size = struct.calcsize(FORMAT)
-	    header = struct.unpack(FORMAT, packet[:header_size])
-	    data = packet[header_size:]
-		
-		"""flag_ack = header[0]
-		recv_seqnum = header[1]
-		self.format_dict[Tag.FLAG_ACK] = flag_ack
-		self.format_dict[Tag.SEQNUM] = recv_seqnum
-		self.format_dict[Tag.DATA] = recv_data"""
-		return (header, data)
+    def send(self, data: bytes):
+        _data = bytearray(data)
+        pkt = self.__pack(self.sender_seqnum, _data)
+        sent = self.socket.send(pkt)
+        start = now()
+        acknowledged = False
 
-	def send(this, data: bytes):
-		for base in range(0, len(data), PACKET_SIZE):
-			chunk = data[base:(base + PACKET_SIZE)]
-			packet = self.pack(Flag.NACK, sender_seqnum, chunk)
-			socket.sendto(packet)
-			start = now()
+        while not acknowledged:
+            try:
+                elapsed = now() - start
+                self.socket.settimeout(self.RTT - elapsed)
+                pkt_received = self.socket.recv(self.MAX_DATAGRAM_SIZE)
+                seq_num_received, _ = self.__unpack(pkt_received)
 
-			acknowledged = False
-			while not acknowledged:
-				try:
-					elapsed = now() - start
-					socket.settimeout(self.RTT - elapsed)
-					recv_packet = socket.recvfrom(PACKET_SIZE)
-					header, data = self.unpack(recv_packet)
+                if seq_num_received == self.sender_seqnum:
+                    self.socket.settimeout(None)
+                    self.sender_seqnum = toggled(self.sender_seqnum)
+                    acknowledged = True
 
-					if FLAG.ACK == header[0]:
-						if header[seqnum] == sender_seqnum:
-							continue
+            except socket.timeout:
+                sent = self.socket.send(pkt)
+                start = now()
 
-						acknowledged = True
-						sender_seqnum = 1 + sender_seqnum
-						sender_seqnum = sender_seqnum % 2
-						socket.settimeout(None)
-					else:
-						packet = self.pack(Flag.ACK, receiver_seqnum, b"")
+        return sent
 
-				except socket.timeout:
-					socket.sendto(packet)
-					start = now()
+    def recv(self, buffsize):
+        pkt_received = self.socket.recv(buffsize)
+        seq_num_received, data_received = self.__unpack(pkt_received)
 
-	def recv(this, buffsize):
-		pass
+        if seq_num_received == self.receiver_seqnum:
+            pkt = self.__pack(self.receiver_seqnum, bytearray(''))
+            self.socket.send(pkt)
+            self.receiver_seqnum = toggled(self.receiver_seqnum)
+        else:
+            pkt = self.__pack(toggled(self.receiver_seqnum), bytearray(''))
+            self.socket.send(pkt)
+
+        return data_received
