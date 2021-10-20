@@ -39,7 +39,7 @@ class SAWTP:
             try:
                 elapsed = now() - start
                 self.socket.settimeout(self.RTT - elapsed)
-                pkt_received, _ = self.socket.recvfrom(self.MAX_DATAGRAM_SIZE)
+                pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE)
                 seq_num_received, _ = self.__unpack(pkt_received)
 
                 if seq_num_received == self.sender_seqnum:
@@ -54,7 +54,7 @@ class SAWTP:
         return sent
 
     def recv(self, buffsize):
-        pkt_received, source = self.socket.recvfrom(64*1024)
+        pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
         seq_num_received, data_received = self.__unpack(pkt_received)
 
         if seq_num_received == self.receiver_seqnum:
