@@ -9,7 +9,7 @@ def toggled(seq_number):
 
 
 class SAWTP:
-    RTT = 100
+    RTT = 1
     SEQ_NUM_SIZE = 1
     MAX_DATAGRAM_SIZE = 64 * 1024
 
