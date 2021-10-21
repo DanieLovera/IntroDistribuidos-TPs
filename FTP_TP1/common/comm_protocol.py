@@ -61,12 +61,17 @@ class CommProtocol:
 		:returns: devuelve el tamanio de los datos a recibir
 
 		"""
-		fixed_length = struct.calcsize(self.FORMAT)
-		data_size = self.socket.recv(fixed_length)
-		if data_size:
-			data_size = struct.unpack(self.FORMAT, data_size)[0]
-			data_size = self.socket.ntohl(data_size)
-
+		correct = False
+		while not correct:
+			try:
+				fixed_length = struct.calcsize(self.FORMAT)
+				data_size = self.socket.recv(fixed_length)
+				if data_size:
+					data_size = struct.unpack(self.FORMAT, data_size)[0]
+					data_size = self.socket.ntohl(data_size)
+					correct = True
+			except RuntimeError:
+				continue
 		return data_size
 
 	def __recv_chunk(self, bufsize):
@@ -75,5 +80,11 @@ class CommProtocol:
 		:returns: devuelve los datos reales enviados por send
 
 		"""
-		chunk = self.socket.recv(bufsize)
+		correct = False
+		while not correct:
+			try:
+				chunk = self.socket.recv(bufsize)
+				correct = True
+			except RuntimeError:
+				continue
 		return chunk

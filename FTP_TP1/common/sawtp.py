@@ -48,6 +48,7 @@ class SAWTP:
                     acknowledged = True
 
             except socket.timeout:
+                print("uh me cai")
                 sent = self.socket.sendto(pkt, (self.__host, self.__port))
                 start = now()
 
@@ -56,7 +57,7 @@ class SAWTP:
     def recv(self, buffsize):
         pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
         seq_num_received, data_received = self.__unpack(pkt_received)
-
+        
         if seq_num_received == self.receiver_seqnum:
             pkt = self.__pack(self.receiver_seqnum, b'')
             self.socket.sendto(pkt, source)
@@ -64,5 +65,7 @@ class SAWTP:
         else:
             pkt = self.__pack(toggled(self.receiver_seqnum), b'')
             self.socket.sendto(pkt, source)
+            print("kjj ack doble")
+            raise RuntimeError
 
         return data_received
