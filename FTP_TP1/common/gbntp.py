@@ -1,20 +1,20 @@
 import socket
 from time import perf_counter as now
 
-WINDOW_SIZE = 4
 
 def next(seq_number):
-    next_sn = (int(seq_number) + 1)/WINDOW_SIZE
-    return bytes(next_sn)
+    return bytes(int(seq_number) + 1)
 
 
 class GBNTP:
     RTT = 1
+    WINDOW_SIZE = 4
     SEQ_NUM_SIZE = 4
     MAX_DATAGRAM_SIZE = 64 * 1024
 
     def __init__(self, socket, host, port):
-        self.sender_seqnum = b'0'
+        self.sender_base = b'1'
+        self.sender_next_seqnum = b'1'
         self.receiver_seqnum = b'0'
         self.socket = socket
         self.not_acknowledged = []
@@ -29,12 +29,19 @@ class GBNTP:
         data = packet[self.SEQ_NUM_SIZE:]
         return seq_num, data
 
-    #Necesitaremos programacion orientada a objetos, para mas informacion hagamos una llamada
     def send(self, data: bytes):
         _data = bytearray(data)
-        pkt = self.__pack(self.sender_seqnum, _data)
-        sent = self.socket.sendto(pkt, (self.__host, self.__port))
-        start = now()
+        if self.sender_next_seqnum < self.sender_base + self.WINDOW_SIZE:
+            self.not_acknowledged[self.sender_next_seqnum] = self.__pack(self.sender_next_seqnum, _data)
+            sent = self.socket.sendto(self.not_acknowledged[self.sender_next_seqnum], (self.__host, self.__port))
+            if self.sender_next_seqnum == self.sender_base:
+                start = now()
+
+            self.sender_next_seqnum = next(self.sender_next_seqnum)
+        else:
+            # A tratarse luego la idea seria manejarlo con un while y una cola
+            # Osea el sender sera bloqueante solo si la ventana esta llena
+            raise Exception
 
         try:
             elapsed = now() - start
