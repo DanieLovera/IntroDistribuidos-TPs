@@ -41,26 +41,14 @@ class ServerFTP:
 		self.commProtocol.send(sopcode)
 
 	def __recv_opcode(self):
-		correct = False
-		while not correct:
-			try:
-				sopcode = self.commProtocol.recv()
-				sopcode = struct.unpack(self.FORMAT, sopcode)[0]
-				sopcode = self.socket.ntohs(sopcode)
-				correct = True
-			except RuntimeError:
-				continue
+		sopcode = self.commProtocol.recv()
+		sopcode = struct.unpack(self.FORMAT, sopcode)[0]
+		sopcode = self.socket.ntohs(sopcode)
 		return sopcode
 
 	def __recv_fname(self):
-		correct = False
-		while not correct:
-			try:
-				fname = self.commProtocol.recv()
-				decoded_fname = fname.decode()
-				correct = True
-			except RuntimeError:
-				continue
+		fname = self.commProtocol.recv()
+		decoded_fname = fname.decode()
 		return decoded_fname
 
 	def __send_chunk(self, chunk: bytes):
@@ -76,12 +64,9 @@ class ServerFTP:
 	def __recv_file(self, file):
 		sopcode = self.__recv_opcode()
 		while sopcode != Opcode.EOF:
-			try:
-				chunk = self.commProtocol.recv()
-				file.write(chunk)
-				sopcode = self.__recv_opcode()
-			except RuntimeError:
-				continue
+			chunk = self.commProtocol.recv()
+			file.write(chunk)
+			sopcode = self.__recv_opcode()
 
 	def __handle_upload_request(self, store_path: str):
 		fname = self.__recv_fname()

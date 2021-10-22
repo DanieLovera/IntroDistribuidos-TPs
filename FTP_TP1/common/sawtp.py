@@ -48,24 +48,24 @@ class SAWTP:
                     acknowledged = True
 
             except socket.timeout:
-                print("uh me cai")
                 sent = self.socket.sendto(pkt, (self.__host, self.__port))
                 start = now()
 
         return sent
 
     def recv(self, buffsize):
-        pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
-        seq_num_received, data_received = self.__unpack(pkt_received)
-        
-        if seq_num_received == self.receiver_seqnum:
-            pkt = self.__pack(self.receiver_seqnum, b'')
-            self.socket.sendto(pkt, source)
-            self.receiver_seqnum = toggled(self.receiver_seqnum)
-        else:
-            pkt = self.__pack(toggled(self.receiver_seqnum), b'')
-            self.socket.sendto(pkt, source)
-            print("kjj ack doble")
-            raise RuntimeError
+        correct_seq_numb = False
+        while not correct_seq_numb:
+            pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
+            seq_num_received, data_received = self.__unpack(pkt_received)
+
+            if seq_num_received == self.receiver_seqnum:
+                pkt = self.__pack(self.receiver_seqnum, b'')
+                self.socket.sendto(pkt, source)
+                self.receiver_seqnum = toggled(self.receiver_seqnum)
+                correct_seq_numb = True
+            else:
+                pkt = self.__pack(toggled(self.receiver_seqnum), b'')
+                self.socket.sendto(pkt, source)
 
         return data_received
