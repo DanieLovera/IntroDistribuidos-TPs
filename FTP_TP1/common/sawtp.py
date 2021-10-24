@@ -11,7 +11,6 @@ def toggled(seq_number):
 class SAWTP:
     RTT = 1
     SEQ_NUM_SIZE = 1
-    MAX_DATAGRAM_SIZE = 64 * 1024
 
     def __init__(self, socket, host, port):
         self.sender_seqnum = b'0'
