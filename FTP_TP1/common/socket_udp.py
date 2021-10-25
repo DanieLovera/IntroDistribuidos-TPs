@@ -1,6 +1,8 @@
 import socket
 from socket_interface import ISocket
 from sawtp import SAWTP
+from gbntp import GBNTP
+
 
 class SocketUDP(ISocket):
 
@@ -12,7 +14,7 @@ class SocketUDP(ISocket):
 
     def __enter__(self):
         self.__peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__protocol = SAWTP(self.__peer, self.__host, self.__port)
+        self.__protocol = GBNTP(self.__peer, self.__host, self.__port)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
