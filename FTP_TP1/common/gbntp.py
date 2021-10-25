@@ -39,7 +39,7 @@ class GBNTP:
 
     def update_state(self, seq_num_received):
         # Clean all the packets acknowledged and their timers
-        for _ in range((seq_num_received - self.sender_base + 1)):
+        for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
             self.not_acknowledged.pop(0)
             self.time_started.pop(0)
 
