@@ -36,16 +36,16 @@ class GBNTP:
         return (self.sender_seq_num - self.sender_base)%self.MAX_SEQ_NUM
 
     def clean_not_acknowledge(self, seq_num_received):
-        for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
+        for _ in range((seq_num_received - self.sender_base + 1)):
             self.not_acknowledged.pop(0)
 
     def update_state(self, seq_num_received):
         # Clean all the packets acknowledged and their timers
-        for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
+        for _ in range((seq_num_received - self.sender_base + 1)):
             self.not_acknowledged.pop(0)
             self.time_started.pop(0)
 
-        self.sender_base = seq_num_received + 1
+        self.sender_base = (seq_num_received + 1)%self.MAX_SEQ_NUM
 
     def send_in_window(self):
         # When the window cover the end and the beginning of the sequence numbers
@@ -56,27 +56,25 @@ class GBNTP:
 
     def send(self, data: bytes):
         print("---------SEND START--------")
-        print("datos")
-        print(data)
         _data = bytearray(data)
         sent = 0
+        print("seq_number")
+        print(self.sender_seq_num)
+
+        print("base")
+        print(self.sender_base)
         if self.send_in_window():
             self.not_acknowledged.append(self.__pack(self.sender_seq_num, _data))
-            sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (self.__host, self.__port))
+            if len(self.not_acknowledged) > 4:
+                self.not_acknowledged[20]
 
-            print("datos array")
-            print(self.not_acknowledged)
+            sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (self.__host, self.__port))
 
             self.time_started.append(now())
 
             print("timers")
             print(self.time_started)
 
-            print("seq_number")
-            print(self.sender_seq_num)
-
-            print("base")
-            print(self.sender_base)
             self.sender_seq_num = self.next(self.sender_seq_num)
         else:
             print("---------WINDOW FULL--------")
