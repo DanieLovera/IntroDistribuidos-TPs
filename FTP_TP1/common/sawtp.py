@@ -12,12 +12,10 @@ class SAWTP:
     RTT = 1
     SEQ_NUM_SIZE = 1
 
-    def __init__(self, socket, host, port):
+    def __init__(self, socket):
         self.sender_seqnum = b'0'
         self.receiver_seqnum = b'0'
         self.socket = socket
-        self.__host = host
-        self.__port = port
 
     def __pack(self, seqnum, data: bytearray):
         return seqnum + data
@@ -27,10 +25,10 @@ class SAWTP:
         data = packet[self.SEQ_NUM_SIZE:]
         return seq_num, data
 
-    def send(self, data: bytes):
+    def send(self, data: bytes, host, port):
         _data = bytearray(data)
         pkt = self.__pack(self.sender_seqnum, _data)
-        sent = self.socket.sendto(pkt, (self.__host, self.__port))
+        sent = self.socket.sendto(pkt, (host, port))
         start = now()
         acknowledged = False
 
@@ -47,7 +45,7 @@ class SAWTP:
                     acknowledged = True
 
             except socket.timeout:
-                sent = self.socket.sendto(pkt, (self.__host, self.__port))
+                sent = self.socket.sendto(pkt, (host, port))
                 start = now()
 
         return sent
@@ -67,4 +65,4 @@ class SAWTP:
                 pkt = self.__pack(toggled(self.receiver_seqnum), b'')
                 self.socket.sendto(pkt, source)
 
-        return data_received
+        return data_received, source

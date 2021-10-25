@@ -8,15 +8,13 @@ class GBNTP:
     WINDOW_SIZE = 4
     MAX_SEQ_NUM = 2 * WINDOW_SIZE
 
-    def __init__(self, socket, host, port):
+    def __init__(self, socket):
         self.sender_base = 0
         self.sender_seq_num = 0
         self.time_started = []
         self.socket = socket
         self.not_acknowledged = []
         self.receiver_seqnum = 0
-        self.__host = host
-        self.__port = port
 
     def next(self, seq_number):
         return (seq_number + 1)%self.MAX_SEQ_NUM
@@ -54,7 +52,7 @@ class GBNTP:
 
         return self.sender_seq_num < self.sender_base + self.WINDOW_SIZE
 
-    def send(self, data: bytes):
+    def send(self, data: bytes, host, port):
         print("---------SEND START--------")
         _data = bytearray(data)
         sent = 0
@@ -68,7 +66,7 @@ class GBNTP:
             if len(self.not_acknowledged) > 4:
                 self.not_acknowledged[20]
 
-            sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (self.__host, self.__port))
+            sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (host, port))
 
             self.time_started.append(now())
 
@@ -105,9 +103,9 @@ class GBNTP:
                     self.time_started.clear()
                     for p in self.not_acknowledged:
                         self.time_started.append(now())
-                        self.socket.sendto(p, (self.__host, self.__port))
+                        self.socket.sendto(p, (host, port))
 
-            sent = self.send(data)
+            sent = self.send(data, host, port)
 
         return sent
 
@@ -133,4 +131,4 @@ class GBNTP:
                 pkt = self.__pack(self.prev(self.receiver_seqnum), b'')
                 self.socket.sendto(pkt, source)
 
-        return data_received
+        return data_received, source

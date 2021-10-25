@@ -14,7 +14,7 @@ class SocketUDP(ISocket):
 
     def __enter__(self):
         self.__peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__protocol = GBNTP(self.__peer, self.__host, self.__port)
+        self.__protocol = GBNTP(self.__peer)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
@@ -25,13 +25,11 @@ class SocketUDP(ISocket):
             self.close()
 
     def send(self, data: bytes):
-        # self.__peer.sendto(data, (self.__host, self.__port))
-        self.__protocol.send(data)
+        self.__protocol.send(data, self.__host, self.__port)
 
     def recv(self, bufsize: int):
-        # data, source = self.__peer.recvfrom(bufsize)
-        # return data, source
-        return self.__protocol.recv(bufsize)
+        data, _ = self.__protocol.recv(bufsize)
+        return data
 
     def bind(self):
         self.__peer.bind((self.__host, self.__port))
