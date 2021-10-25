@@ -24,8 +24,8 @@ class SocketUDP(ISocket):
         if not self.__peer:
             self.close()
 
-    def send(self, data: bytes):
-        self.__protocol.send(data, self.__host, self.__port)
+    def send(self, data: bytes, last_send: bool = False):
+        self.__protocol.send(data, self.__host, self.__port, last_send)
 
     def recv(self, bufsize: int):
         data, _ = self.__protocol.recv(bufsize)

@@ -5,7 +5,7 @@ import socket
 class ISocket(abc.ABC):
 
 	@abc.abstractmethod
-	def send(self, data: bytes):
+	def send(self, data: bytes, last_send: bool = False):
 		""" Envia los datos
 
 		:param data: datos a enviar

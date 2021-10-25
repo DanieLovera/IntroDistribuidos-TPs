@@ -31,7 +31,7 @@ class ClientFTP:
 		self.__send_opcode(Opcode.UPLOAD)
 		self.__send_fname(fname)
 		self.__send_file(file)
-		self.__send_opcode(Opcode.EOF)
+		self.__send_opcode(Opcode.EOF, True)
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
 	def download_file(self, file, fname):
@@ -39,11 +39,11 @@ class ClientFTP:
 		self.__send_fname(fname)
 		self.__recv_file(file)
 
-	def __send_opcode(self, opcode: Opcode):
+	def __send_opcode(self, opcode: Opcode, last_send: bool = False):
 		sopcode = int(opcode)
 		sopcode = self.socket.htons(sopcode)
 		sopcode = struct.pack(self.FORMAT, sopcode)
-		self.commProtocol.send(sopcode)
+		self.commProtocol.send(sopcode, last_send)
 
 	def __recv_opcode(self):
 		sopcode = self.commProtocol.recv()
