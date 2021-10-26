@@ -33,10 +33,6 @@ class GBNTP:
     def get_offset(self):
         return (self.sender_seq_num - self.sender_base)%self.MAX_SEQ_NUM
 
-    def clean_not_acknowledge(self, seq_num_received):
-        for _ in range((seq_num_received - self.sender_base + 1)):
-            self.not_acknowledged.pop(0)
-
     def update_state(self, seq_num_received):
         # Clean all the packets acknowledged and their timers
         for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
@@ -53,77 +49,55 @@ class GBNTP:
         return self.sender_seq_num < self.sender_base + self.WINDOW_SIZE
 
     def send(self, data: bytes, host, port, last_send: bool = False):
-        print("---------SEND START--------")
         _data = bytearray(data)
         sent = 0
-        print("seq_number")
-        print(self.sender_seq_num)
 
-        print("base")
-        print(self.sender_base)
         if self.send_in_window():
             self.not_acknowledged.append(self.__pack(self.sender_seq_num, _data))
-            if len(self.not_acknowledged) > 4:
-                self.not_acknowledged[20]
-
             sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (host, port))
-
             self.time_started.append(now())
-
-            print("timers")
-            print(self.time_started)
-
             self.sender_seq_num = self.next(self.sender_seq_num)
-
-            return sent
-
-        print("---------WINDOW FULL--------")
-        advanced = False
-        while not advanced:
-            try:
-                timeout = self.RTT - (now() - self.time_started[0])
-                if timeout <= 0:
-                    print("timeout a mano")
-                    print(timeout)
-                    raise socket.timeout
-
-                self.socket.settimeout(timeout)
-                pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE)
-                seq_num_received, _ = self.__unpack(pkt_received)
-                if seq_num_received < self.sender_base:
-                    print("Incorrect seq_num_received")
-                    print(seq_num_received)
-                    continue
-
-                print("Correct seq_num_received")
-                print(seq_num_received)
-                self.update_state(seq_num_received)
-                advanced = True
-
-            except socket.timeout:
-                print("timeout excepcion")
-                self.time_started.clear()
-                for p in self.not_acknowledged:
-                    self.time_started.append(now())
-                    self.socket.sendto(p, (host, port))
-
-        sent = self.send(data, host, port, last_send)
-
-        # Ensure all the data had been sent to destination
-        # because there won't be more send
-        if last_send:
-            print("-----LAST-SENT-----")
-            while len(self.not_acknowledged) == 0:
+        else:
+            advanced = False
+            while not advanced:
                 try:
                     timeout = self.RTT - (now() - self.time_started[0])
                     if timeout <= 0:
-                        print("timeout a mano")
-                        print(timeout)
                         raise socket.timeout
 
                     self.socket.settimeout(timeout)
                     pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE)
                     seq_num_received, _ = self.__unpack(pkt_received)
+                    if seq_num_received < self.sender_base:
+                        continue
+
+                    self.update_state(seq_num_received)
+                    advanced = True
+
+                except socket.timeout:
+                    self.time_started.clear()
+                    for p in self.not_acknowledged:
+                        self.time_started.append(now())
+                        self.socket.sendto(p, (host, port))
+
+            sent = self.send(data, host, port, last_send)
+
+        # Ensure all the data had been sent to destination
+        # because there won't be more send
+        if last_send:
+            while not len(self.not_acknowledged) == 0:
+                try:
+                    timeout = self.RTT - (now() - self.time_started[0])
+                    if timeout <= 0:
+                        raise socket.timeout
+
+                    self.socket.settimeout(timeout)
+                    pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE)
+                    seq_num_received, _ = self.__unpack(pkt_received)
+                    if seq_num_received < self.sender_base:
+                        continue
+
+                    self.update_state(seq_num_received)
                 except socket.timeout:
                     self.time_started.clear()
                     for p in self.not_acknowledged:
@@ -133,24 +107,17 @@ class GBNTP:
         return sent
 
     def recv(self, buffsize):
-        print("---------RECV START--------")
         correct_seq_numb = False
         while not correct_seq_numb:
             pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
             seq_num_received, data_received = self.__unpack(pkt_received)
-            print("data received")
-            print(data_received)
 
             if seq_num_received == self.receiver_seqnum:
-                print("Seq_num_expected")
-                print(seq_num_received)
                 pkt = self.__pack(self.receiver_seqnum, b'')
                 self.socket.sendto(pkt, source)
                 self.receiver_seqnum = self.next(self.receiver_seqnum)
                 correct_seq_numb = True
             else:
-                print("incorrect seq_num_expected")
-                print(seq_num_received)
                 pkt = self.__pack(self.prev(self.receiver_seqnum), b'')
                 self.socket.sendto(pkt, source)
 
