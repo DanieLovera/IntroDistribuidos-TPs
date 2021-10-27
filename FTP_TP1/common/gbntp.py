@@ -7,6 +7,7 @@ class GBNTP:
     RTT = 1
     WINDOW_SIZE = 4
     MAX_SEQ_NUM = 2 * WINDOW_SIZE
+    MAX_DATAGRAM_SIZE = 64000    # 64kb
 
     def __init__(self, socket):
         self.sender_base = 0
@@ -48,13 +49,16 @@ class GBNTP:
 
         return self.sender_seq_num < self.sender_base + self.WINDOW_SIZE
 
-    def send(self, data: bytes, host, port, last_send: bool = False):
-        _data = bytearray(data)
+    def _send_a_packet(self, data: bytearray, host, port, last_send: bool):
         sent = 0
 
         if self.send_in_window():
-            self.not_acknowledged.append(self.__pack(self.sender_seq_num, _data))
-            sent = self.socket.sendto(self.not_acknowledged[self.get_offset()], (host, port))
+            self.not_acknowledged.append(
+                self.__pack(self.sender_seq_num, data)
+            )
+            sent = self.socket.sendto(
+                self.not_acknowledged[self.get_offset()], (host, port)
+            )
             self.time_started.append(now())
             self.sender_seq_num = self.next(self.sender_seq_num)
         else:
@@ -106,7 +110,30 @@ class GBNTP:
 
         return sent
 
-    def recv(self, buffsize):
+    def send(self, data: bytes, host, port):
+        _data = bytearray(data)
+        sent = 0
+
+        for i in range(0, len(_data), self.MAX_DATAGRAM_SIZE):
+            last_send = False
+
+            if i + self.MAX_DATAGRAM_SIZE > len(_data):
+                last_send = True
+
+            sent += self._send_a_packet(
+                _data[i:min(i + self.MAX_DATAGRAM_SIZE, len(_data))],
+                host,
+                port,
+                last_send
+            )
+
+        self.sender_base = 0
+        self.sender_seq_num = 0
+        self.time_started = []
+        self.not_acknowledged = []
+        return sent
+
+    def _recv(self, buffsize):
         correct_seq_numb = False
         while not correct_seq_numb:
             pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
@@ -122,3 +149,15 @@ class GBNTP:
                 self.socket.sendto(pkt, source)
 
         return data_received, source
+
+    def recv(self, buffsize):
+        received = 0
+        data = []
+        for i in range(0, buffsize, self.MAX_DATAGRAM_SIZE):
+            d, s = self._recv(min(self.MAX_DATAGRAM_SIZE, buffsize - i))
+            data.append(d)
+            received += len(d)
+
+        data = b''.join(data)
+        self.receiver_seqnum = 0
+        return data, s

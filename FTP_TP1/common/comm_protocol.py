@@ -14,7 +14,7 @@ class CommProtocol:
         """
         self.socket = socket
 
-    def send(self, data: bytes, last_send: bool = False):
+    def send(self, data: bytes):
         """ Envia un stream datos
 
         :param data: datos a enviar
@@ -22,7 +22,7 @@ class CommProtocol:
 
         """
         self.__send_size(len(data))
-        self.__send_chunk(data, last_send)
+        self.__send_chunk(data)
 
     def recv(self):
         """ Recibe un stream de datos
@@ -46,13 +46,13 @@ class CommProtocol:
         data_size = struct.pack(self.FORMAT, data_size)
         self.socket.send(data_size)
 
-    def __send_chunk(self, data: bytes, last_send: bool = False):
+    def __send_chunk(self, data: bytes):
         """ Envia un chunk de datos
 
         :param data: datos a enviar
 
         """
-        self.socket.send(data, last_send)
+        self.socket.send(data)
 
     def __recv_size(self):
         """ Recibe una longitud fija de bytes con el tamanio

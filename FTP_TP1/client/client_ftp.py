@@ -20,7 +20,7 @@ class Opcode(enum.IntEnum):
 
 class ClientFTP:
 	FORMAT = "H"
-	CHUNK_SIZE = 1024
+	CHUNK_SIZE = 256 * 1024
 
 	def __init__(self, socket: ISocket):
 		self.socket = socket
@@ -31,7 +31,7 @@ class ClientFTP:
 		self.__send_opcode(Opcode.UPLOAD)
 		self.__send_fname(fname)
 		self.__send_file(file)
-		self.__send_opcode(Opcode.EOF, True)
+		self.__send_opcode(Opcode.EOF)
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
 	def download_file(self, file, fname):
@@ -39,11 +39,11 @@ class ClientFTP:
 		self.__send_fname(fname)
 		self.__recv_file(file)
 
-	def __send_opcode(self, opcode: Opcode, last_send: bool = False):
+	def __send_opcode(self, opcode: Opcode):
 		sopcode = int(opcode)
 		sopcode = self.socket.htons(sopcode)
 		sopcode = struct.pack(self.FORMAT, sopcode)
-		self.commProtocol.send(sopcode, last_send)
+		self.commProtocol.send(sopcode)
 
 	def __recv_opcode(self):
 		sopcode = self.commProtocol.recv()
