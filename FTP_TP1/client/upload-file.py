@@ -38,15 +38,21 @@ def parseArguments(parser):
 
     transportProtocol = parser.add_mutually_exclusive_group(required=True)
 
-    transportProtocol.add_argument('-t', '--tcp', type=str,
+    transportProtocol.add_argument('-t', '--tcp', const='tcp',
                                    required=False,
                                    help='send file over TCP protocol',
                                    dest='protocol', action='store_const')
 
-    transportProtocol.add_argument('-w', '--saw', type=str,
+    transportProtocol.add_argument('-w', '--saw', const='saw',
                                    required=False,
                                    help='send file over UDP protocol' +
                                    '(Stop-and-Wait)',
+                                   dest='protocol', action='store_const')
+
+    transportProtocol.add_argument('-g', '--gbn', const='gbn',
+                                   required=False,
+                                   help='send file over UDP protocol' +
+                                   '(Go-Back-N)',
                                    dest='protocol', action='store_const')
 
 
@@ -60,7 +66,30 @@ def main():
     port = args.port
     fpath = args.filepath
     fname = args.filename
-    protocol = args.protocol
+    
+    # descomentar cuando este bien
+    # if args.protocol == "tcp":
+    #     # with SocketTCP() as peer:
+    #         peer.connect(host, port)
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open(fpath, "rb") as file:
+    #             ftp.upload_file(file, fname)
+
+    # elif protocol == "saw":
+    #     with SocketUDP(host, port) as peer:
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open(fpath, "rb") as file:
+    #             ftp.upload_file(file, fname)
+
+    # else:
+    #    with SocketUDP(host, port) as peer:
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open(fpath, "rb") as file:
+    #             ftp.upload_file(file, fname)
+
 
 if __name__ == "__main__":
     main()
