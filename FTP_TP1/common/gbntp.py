@@ -10,12 +10,12 @@ class GBNTP:
     MAX_DATAGRAM_SIZE = 64000    # 64kb
 
     def __init__(self, socket):
-        self.sender_base = 0
-        self.sender_seq_num = 0
+        self.sender_base = 1
+        self.sender_seq_num = 1
         self.time_started = []
         self.not_acknowledged = []
         self.socket = socket
-        self.receiver_seqnum = 0
+        self.receiver_seqnum = 1
 
     def next(self, seq_number):
         return (seq_number + 1)%self.MAX_SEQ_NUM
@@ -127,8 +127,8 @@ class GBNTP:
                 last_send
             )
 
-        self.sender_base = 0
-        self.sender_seq_num = 0
+        self.sender_base = 1
+        self.sender_seq_num = 1
         self.time_started = []
         self.not_acknowledged = []
         return sent
@@ -159,5 +159,5 @@ class GBNTP:
             received += len(d)
 
         data = b''.join(data)
-        self.receiver_seqnum = 0
+        self.receiver_seqnum = 1
         return data, s
