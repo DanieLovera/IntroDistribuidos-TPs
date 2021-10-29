@@ -7,6 +7,7 @@ script_dir = os.path.dirname(__file__)
 myModule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(myModule_dir)
 from socket_tcp import SocketTCP
+from socket_udp import SocketUDP
 
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
@@ -48,12 +49,19 @@ def main():
     if not pathExist:
         os.makedirs(fpath)
 
-    with SocketTCP() as peer:
+    '''with SocketTCP() as peer:
         peer.connect(host, port)
         ftp = ClientFTP(peer)
 
         with open((fpath + "/" + fname), "wb") as file:
-            ftp.download_file(file, fname)
+            ftp.download_file(file, fname) '''
+
+    with SocketUDP(host, port) as peer:
+            ftp = ClientFTP(peer)
+
+            with open((fpath + "/" + fname), "wb") as file:
+                ftp.download_file(file, fname)
+
 
 if __name__ == "__main__":
     main()

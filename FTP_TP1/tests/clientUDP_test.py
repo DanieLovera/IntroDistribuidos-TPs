@@ -13,6 +13,6 @@ socketUDP = SocketUDP()
 message = "Hola soy tu cliente!"
 
 socketUDP.sendto(message.encode(), (serverName, serverPort))
-modifiedMessage, serverAddress = socketUDP.recvfrom(2048)
+modifiedMessage, serverAddress = socketUDP.recv(2048)
 print(modifiedMessage.decode())
 socketUDP.close()
