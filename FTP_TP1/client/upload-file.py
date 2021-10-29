@@ -66,25 +66,24 @@ def main():
     fpath = args.filepath
     fname = args.filename
     
-    # descomentar cuando este bien
-    # if args.protocol == "tcp":
-    #     # with SocketTCP() as peer:
-    #         peer.connect(host, port)
-    #         ftp = ClientFTP(peer, args.verbose)
+    if args.protocol == "tcp":
+        with SocketTCP() as peer:
+            peer.connect(host, port)
+            ftp = ClientFTP(peer, args.verbose)
+            with open(fpath, "rb") as file:
+                ftp.upload_file(file, fname)
 
-    #         with open(fpath, "rb") as file:
-    #             ftp.upload_file(file, fname)
+    elif args.protocol == "saw":
+        with SocketUDP(host, port) as peer:
+            ftp = ClientFTP(peer, args.verbose)
+            with open(fpath, "rb") as file:
+                ftp.upload_file(file, fname)
 
-    # elif protocol == "saw":
-    #     with SocketUDP(host, port) as peer:
-    #         ftp = ClientFTP(peer, args.verbose)
-
-    #         with open(fpath, "rb") as file:
-    #             ftp.upload_file(file, fname)
-
-    # else:
-    #    with SocketUDP(host, port) as peer:
-    #         ftp = ClientFTP(peer, args.verbose)
+    else:
+        with SocketUDP(host, port) as peer:
+            ftp = ClientFTP(peer, args.verbose)
+            with open(fpath, "rb") as file:
+                ftp.upload_file(file, fname)
 
 if __name__ == "__main__":
     main()
