@@ -77,12 +77,6 @@ def main():
         with open((fpath + "/" + fname), "wb") as file:
             ftp.download_file(file, fname) '''
 
-    with SocketUDP(host, port) as peer:
-            ftp = ClientFTP(peer)
-
-            with open((fpath + "/" + fname), "wb") as file:
-                ftp.download_file(file, fname)
-
     if args.protocol == "tcp":
         with SocketTCP() as peer:
             peer.connect(host, port)
