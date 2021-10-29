@@ -7,6 +7,7 @@ script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 from socket_tcp import SocketTCP
+from socket_udp import SocketUDP
 
 
 def parseArguments(parser):
@@ -52,14 +53,6 @@ def main():
     if not pathExist:
         os.makedirs(storage_path)
 
-    with SocketTCP() as listener:
-        listener.bind(host, port)
-        listener.listen(MAX_CONNECTIONS)
-        peer = listener.accept()
-        with peer:
-            ftp = ServerFTP(peer)
-            ftp.handle_request(storage_path)
-
     # descomentar:
     # if args.protocol == "tcp":
         # with SocketTCP() as listener:
@@ -72,12 +65,12 @@ def main():
     # elif args.protocol == "saw":
         # with SocketUDP() as socket:
         #    ftp = ServerFTP(socket, args.verbose)
-        #    ftp.handle_request(STORE_PATH)
+        #    ftp.handle_request(storage_path)
     # else:
-        # with SocketUDP() as socket:
+        # with SocketUDP(host, port) as socket:
+        #    socket.bind(host, port)
         #    ftp = ServerFTP(socket, args.verbose)
-        #    ftp.handle_request(STORE_PATH)
-
+        #    ftp.handle_request(storage_path)
 
 if __name__ == "__main__":
     main()

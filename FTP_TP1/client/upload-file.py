@@ -55,7 +55,6 @@ def parseArguments(parser):
                                    '(Go-Back-N)',
                                    dest='protocol', action='store_const')
 
-
 def main():
     parser = argparse.ArgumentParser(description='Envía un archivo al' +
                                      ' servidor para ser guardado' +
@@ -86,10 +85,6 @@ def main():
     # else:
     #    with SocketUDP(host, port) as peer:
     #         ftp = ClientFTP(peer, args.verbose)
-
-    #         with open(fpath, "rb") as file:
-    #             ftp.upload_file(file, fname)
-
 
 if __name__ == "__main__":
     main()
