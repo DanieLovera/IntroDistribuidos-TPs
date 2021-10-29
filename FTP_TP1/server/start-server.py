@@ -41,7 +41,7 @@ def main():
     #        ftp.handle_request(storage_path)
 
     with SocketUDP(host, port) as socket:
-        socket.bind()
+        socket.bind(host, port)
         ftp = ServerFTP(socket)
         ftp.handle_request(storage_path)
 

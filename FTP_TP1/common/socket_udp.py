@@ -28,11 +28,16 @@ class SocketUDP(ISocket):
         self.__protocol.send(data, self.__host, self.__port)
 
     def recv(self, bufsize: int):
-        data, _ = self.__protocol.recv(bufsize)
+        #data, _ = self.__protocol.recv(bufsize)
+        #return data
+
+        data, source = self.__protocol.recv(bufsize)
+        self.__host = source[0]
+        self.__port = source[1]
         return data
 
-    def bind(self):
-        self.__peer.bind((self.__host, self.__port))
+    def bind(self, host, port):
+        self.__peer.bind((host, port))
 
     def close(self):
         self.__peer.close()
