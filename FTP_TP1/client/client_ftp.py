@@ -20,7 +20,7 @@ class Opcode(enum.IntEnum):
 
 class ClientFTP:
 	FORMAT = "H"
-	CHUNK_SIZE = 256 * 1024
+	CHUNK_SIZE = 1024 * 1024
 
 	def __init__(self, socket: ISocket):
 		self.socket = socket

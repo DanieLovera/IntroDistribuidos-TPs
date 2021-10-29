@@ -144,6 +144,7 @@ class GBNTP:
                 last_send
             )
 
+        self.socket.settimeout(None)
         return sent
 
     def _recv(self, buffsize):
