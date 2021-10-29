@@ -6,8 +6,9 @@ from client_ftp import ClientFTP
 script_dir = os.path.dirname(__file__)
 myModule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(myModule_dir)
-from socket_tcp import SocketTCP
+
 from socket_udp import SocketUDP
+from socket_tcp import SocketTCP
 
 
 def parseArguments(parser):
@@ -57,7 +58,8 @@ def parseArguments(parser):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Solicita y recibe un archivo del servidor')
+    parser = argparse.ArgumentParser(
+        description='Solicita y recibe un archivo del servidor')
     parseArguments(parser)
     args = parser.parse_args()
 

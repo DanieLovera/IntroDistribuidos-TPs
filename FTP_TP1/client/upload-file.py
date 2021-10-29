@@ -6,8 +6,9 @@ from client_ftp import ClientFTP
 script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
-from socket_tcp import SocketTCP
+
 from socket_udp import SocketUDP
+from socket_tcp import SocketTCP
 
 
 def parseArguments(parser):
@@ -66,7 +67,7 @@ def main():
     port = args.port
     fpath = args.filepath
     fname = args.filename
-    
+
     if args.protocol == "tcp":
         with SocketTCP() as peer:
             peer.connect(host, port)

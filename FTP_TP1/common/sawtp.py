@@ -93,7 +93,8 @@ class SAWTP:
         print("-----chunks-----")
         print(buffsize)
         while not correct_seq_numb:
-            pkt_received, source = self.socket.recvfrom(buffsize + self.SEQ_NUM_SIZE)
+            pkt_received, source = self.socket.recvfrom(
+                buffsize + self.SEQ_NUM_SIZE)
             seq_num_received, data_received = self.__unpack(pkt_received)
 
             print("pkt:")

@@ -7,8 +7,8 @@ script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, '..', 'common')
 sys.path.append(mymodule_dir)
 
-from socket_interface import ISocket
 from comm_protocol import CommProtocol
+from socket_interface import ISocket
 
 
 @enum.unique

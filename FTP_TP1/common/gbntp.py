@@ -22,10 +22,10 @@ class GBNTP:
         self.timeout = Timer()
 
     def next(self, seq_number):
-        return (seq_number + 1)%self.MAX_SEQ_NUM
+        return (seq_number + 1) % self.MAX_SEQ_NUM
 
     def prev(self, seq_number):
-        return (seq_number - 1)%self.MAX_SEQ_NUM
+        return (seq_number - 1) % self.MAX_SEQ_NUM
 
     def __pack(self, seq_num, type_data, data: bytearray):
         return seq_num.to_bytes(self.SEQ_NUM_SIZE, 'big') + type_data + data
@@ -39,21 +39,21 @@ class GBNTP:
         return int.from_bytes(seq_num, 'big'), type_data, data
 
     def get_offset(self):
-        return (self.sender_seq_num - self.sender_base)%self.MAX_SEQ_NUM
+        return (self.sender_seq_num - self.sender_base) % self.MAX_SEQ_NUM
 
     def update_state(self, seq_num_received, start):
         # Clean all the packets acknowledged and their timers
         self.timeout.calculateTimeout(now() - start)
 
-        for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
+        for _ in range((seq_num_received - self.sender_base + 1) % self.MAX_SEQ_NUM):
             self.not_acknowledged.pop(0)
 
-        self.sender_base = (seq_num_received + 1)%self.MAX_SEQ_NUM
+        self.sender_base = (seq_num_received + 1) % self.MAX_SEQ_NUM
 
     def send_in_window(self):
         # When the window cover the end and the beginning of the sequence numbers
         if self.sender_base + self.WINDOW_SIZE >= self.MAX_SEQ_NUM and self.sender_seq_num < self.WINDOW_SIZE:
-            return self.sender_seq_num < (self.sender_base + self.WINDOW_SIZE)%self.MAX_SEQ_NUM
+            return self.sender_seq_num < (self.sender_base + self.WINDOW_SIZE) % self.MAX_SEQ_NUM
 
         return self.sender_seq_num < self.sender_base + self.WINDOW_SIZE
 
@@ -84,8 +84,10 @@ class GBNTP:
                         raise socket.timeout
 
                     self.socket.settimeout(timeout)
-                    pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE + self.DATA_SIZE)
-                    seq_num_received, type_data, _ = self.__unpack(pkt_received)
+                    pkt_received, _ = self.socket.recvfrom(
+                        self.SEQ_NUM_SIZE + self.DATA_SIZE)
+                    seq_num_received, type_data, _ = self.__unpack(
+                        pkt_received)
                     print("numero de secuencia recivido")
                     print(seq_num_received)
                     print("base actual")
@@ -99,14 +101,14 @@ class GBNTP:
                     # and at the beginning
                     if self.sender_base + self.WINDOW_SIZE >= \
                             self.MAX_SEQ_NUM and seq_num_received < \
-                                self.sender_base and seq_num_received > \
-                                    (self.sender_base + self.WINDOW_SIZE) \
-                                        % self.MAX_SEQ_NUM:
+                        self.sender_base and seq_num_received > \
+                        (self.sender_base + self.WINDOW_SIZE) \
+                        % self.MAX_SEQ_NUM:
                         continue
                     elif self.sender_base + self.WINDOW_SIZE < \
                             self.MAX_SEQ_NUM and (seq_num_received <
-                                self.sender_base or seq_num_received >
-                                    self.sender_base + self.WINDOW_SIZE):
+                                                  self.sender_base or seq_num_received >
+                                                  self.sender_base + self.WINDOW_SIZE):
                         continue
 
                     self.update_state(seq_num_received, start)
@@ -135,8 +137,10 @@ class GBNTP:
                         raise socket.timeout
 
                     self.socket.settimeout(timeout)
-                    pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE + self.DATA_SIZE)
-                    seq_num_received, type_data, _ = self.__unpack(pkt_received)
+                    pkt_received, _ = self.socket.recvfrom(
+                        self.SEQ_NUM_SIZE + self.DATA_SIZE)
+                    seq_num_received, type_data, _ = self.__unpack(
+                        pkt_received)
                     print("numero de secuencia recivido")
                     print(seq_num_received)
                     print("base actual")
@@ -147,15 +151,15 @@ class GBNTP:
 
                     if self.sender_base + self.WINDOW_SIZE >= \
                             self.MAX_SEQ_NUM and seq_num_received < \
-                                self.sender_base and seq_num_received > \
-                                    (self.sender_base + self.WINDOW_SIZE) \
-                                        % self.MAX_SEQ_NUM:
+                        self.sender_base and seq_num_received > \
+                        (self.sender_base + self.WINDOW_SIZE) \
+                        % self.MAX_SEQ_NUM:
                         timeouts = 0
                         continue
                     elif self.sender_base + self.WINDOW_SIZE < \
                             self.MAX_SEQ_NUM and (seq_num_received <
-                                self.sender_base or seq_num_received >
-                                    self.sender_base + self.WINDOW_SIZE):
+                                                  self.sender_base or seq_num_received >
+                                                  self.sender_base + self.WINDOW_SIZE):
                         timeouts = 0
                         continue
 
@@ -206,8 +210,10 @@ class GBNTP:
         print(buffsize)
         correct_seq_numb = False
         while not correct_seq_numb:
-            pkt_received, source = self.socket.recvfrom(buffsize + self.DATA_SIZE + self.SEQ_NUM_SIZE)
-            seq_num_received, type_data, data_received = self.__unpack(pkt_received)
+            pkt_received, source = self.socket.recvfrom(
+                buffsize + self.DATA_SIZE + self.SEQ_NUM_SIZE)
+            seq_num_received, type_data, data_received = self.__unpack(
+                pkt_received)
 
             print("numero de sequencia recibido")
             print(seq_num_received)
@@ -226,7 +232,8 @@ class GBNTP:
             else:
                 print("Reenviando el ack")
                 print(self.prev(self.receiver_seqnum))
-                pkt = self.__pack(self.prev(self.receiver_seqnum), self.TYPE_ACK, b'')
+                pkt = self.__pack(
+                    self.prev(self.receiver_seqnum), self.TYPE_ACK, b'')
                 self.socket.sendto(pkt, source)
 
         return data_received, source
