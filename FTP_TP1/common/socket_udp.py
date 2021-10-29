@@ -6,15 +6,19 @@ from gbntp import GBNTP
 
 class SocketUDP(ISocket):
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, protocol):
         self.__peer = None
         self.__host = host
         self.__port = port
+        self.__protocol_string = protocol
         self.__protocol = None
 
     def __enter__(self):
         self.__peer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__protocol = GBNTP(self.__peer)
+        if(self.__protocol_string == "gbn"):
+            self.__protocol = GBNTP(self.__peer)
+        else:
+            self.__protocol = SAWTP(self.__peer)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):

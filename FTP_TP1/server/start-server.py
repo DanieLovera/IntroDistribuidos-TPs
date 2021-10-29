@@ -53,24 +53,25 @@ def main():
     if not pathExist:
         os.makedirs(storage_path)
 
-    # descomentar:
-    # if args.protocol == "tcp":
-        # with SocketTCP() as listener:
-        #     listener.bind(host, port)
-        #     listener.listen(MAX_CONNECTIONS)
-        #     peer = listener.accept()
-        #     with peer:
-        #         ftp = ServerFTP(peer, args.verbose)
-        #         ftp.handle_request(storage_path)
-    # elif args.protocol == "saw":
-        # with SocketUDP() as socket:
-        #    ftp = ServerFTP(socket, args.verbose)
-        #    ftp.handle_request(storage_path)
-    # else:
-        # with SocketUDP(host, port) as socket:
-        #    socket.bind(host, port)
-        #    ftp = ServerFTP(socket, args.verbose)
-        #    ftp.handle_request(storage_path)
+    if args.protocol == "tcp":
+        with SocketTCP() as listener:
+            listener.bind(host, port)
+            listener.listen(MAX_CONNECTIONS)
+            peer = listener.accept()
+            with peer:
+                ftp = ServerFTP(peer, args.verbose)
+                ftp.handle_request(storage_path)
+    elif args.protocol == "saw":
+        with SocketUDP(host, port, args.protocol) as socket:
+            socket.bind(host, port)
+            ftp = ServerFTP(socket, args.verbose)
+            ftp.handle_request(storage_path)
+    else:
+        with SocketUDP(host, port, args.protocol) as socket:
+            socket.bind(host, port)
+            ftp = ServerFTP(socket, args.verbose)
+            ftp.handle_request(storage_path)
+
 
 if __name__ == "__main__":
     main()

@@ -83,29 +83,22 @@ def main():
             with open((fpath + "/" + fname), "wb") as file:
                 ftp.download_file(file, fname)
 
-
-    # descomentar cuando este bien
-    # if args.protocol == "tcp":
-    #     # with SocketTCP() as peer:
-    #         peer.connect(host, port)
-    #         ftp = ClientFTP(peer, args.verbose)
-
-    #         with open((fpath + "/" + fname), "wb") as file:
-    #            ftp.download_file(file, fname)
-
-    # elif protocol == "saw":
-    #     with SocketUDP(host, port) as peer:
-    #         ftp = ClientFTP(peer, args.verbose)
-
-    #         with open((fpath + "/" + fname), "wb") as file:
-    #            ftp.download_file(file, fname)
-
-    # else:
-    #    with SocketUDP(host, port) as peer:
-    #         ftp = ClientFTP(peer, args.verbose)
-
-    #         with open((fpath + "/" + fname), "wb") as file:
-    #            ftp.download_file(file, fname)
+    if args.protocol == "tcp":
+        with SocketTCP() as peer:
+            peer.connect(host, port)
+            ftp = ClientFTP(peer, args.verbose)
+            with open((fpath + "/" + fname), "wb") as file:
+                ftp.download_file(file, fname)
+    elif args.protocol == "saw":
+        with SocketUDP(host, port, args.protocol) as peer:
+            ftp = ClientFTP(peer, args.verbose)
+            with open((fpath + "/" + fname), "wb") as file:
+                ftp.download_file(file, fname)
+    else:
+        with SocketUDP(host, port, args.protocol) as peer:
+            ftp = ClientFTP(peer, args.verbose)
+            with open((fpath + "/" + fname), "wb") as file:
+                ftp.download_file(file, fname)
 
 
 if __name__ == "__main__":

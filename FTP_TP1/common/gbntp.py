@@ -1,10 +1,11 @@
 import socket
+from timer import Timer
 from time import perf_counter as now
 
 
 class GBNTP:
     SEQ_NUM_SIZE = 1
-    RTT = 1
+    #RTT = 1
     WINDOW_SIZE = 4
     MAX_SEQ_NUM = 2 * WINDOW_SIZE
     MAX_DATAGRAM_SIZE = 64000    # 64kb
@@ -16,6 +17,7 @@ class GBNTP:
         self.not_acknowledged = []
         self.socket = socket
         self.receiver_seqnum = 1
+        self.timeout = Timer()
 
     def next(self, seq_number):
         return (seq_number + 1)%self.MAX_SEQ_NUM
@@ -69,7 +71,7 @@ class GBNTP:
             advanced = False
             while not advanced:
                 try:
-                    timeout = self.RTT - (now() - self.time_started[0])
+                    timeout = self.timeout.getTimeout() - (now() - self.time_started[0])
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -82,9 +84,11 @@ class GBNTP:
                         continue
 
                     self.update_state(seq_num_received)
+                    self.timeout.calculateTimeout(now() - self.time_started[0])
                     advanced = True
 
                 except socket.timeout:
+                    self.timeout.timeout()
                     self.time_started.clear()
                     for p in self.not_acknowledged:
                         self.time_started.append(now())
@@ -100,7 +104,7 @@ class GBNTP:
                 # print("tamaño")
                 # print(len(self.not_acknowledged))
                 try:
-                    timeout = self.RTT - (now() - self.time_started[0])
+                    timeout = self.timeout.getTimeout() - (now() - self.time_started[0])
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -114,6 +118,7 @@ class GBNTP:
 
                     self.update_state(seq_num_received)
                 except socket.timeout:
+                    self.timeout.timeout()
                     # print("Reenviando paquetes")
                     self.time_started.clear()
                     for p in self.not_acknowledged:
@@ -170,7 +175,7 @@ class GBNTP:
                 # print(self.prev(self.receiver_seqnum))
                 pkt = self.__pack(self.prev(self.receiver_seqnum), b'')
                 self.socket.sendto(pkt, source)
-
+        
         return data_received, source
 
     def recv(self, buffsize):
