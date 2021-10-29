@@ -4,9 +4,9 @@ Este documento contiene instrucciones de cómo ejecutar el cliente y el servidor
 
 ## Servidor
 
-El servidor consta de un sólo comando `start-server`, que permite iniciar el servidor. Para correrlo, ejecutar en el directorio del archivo start-server.py:
+El servidor consta de un sólo comando `start-server`, que permite iniciar el servidor. Para correrlo, ejecutar en el directorio del archivo _start-server.py_:
 
-`python3 start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH] (-t | -w | -g PROTOCOL)`
+`python3 ./start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH] (-t | -w | -g PROTOCOL)`
 
 Pueden utilizarse distintos flags:
 
@@ -19,16 +19,16 @@ Pueden utilizarse distintos flags:
 
 ## Cliente
 
-El cliente cuenta con dos comandos distintos:
+El cliente cuenta con dos comandos distintos:  
 
-    `upload-file`: permite subir un archivo al servidor.  
-    `download-file`: permite descargar un archivo del servidor.  
+   `upload-file`: permite subir un archivo al servidor.     
+    `download-file`: permite descargar un archivo del servidor.    
 
 ### upload-file
 
-Para correr este módulo, ejecutar:
+Para correr este módulo, ejecutar en el directorio del archivo _upload-file.py_:
 
-`$ python3 upload-file [-h] [-v | -q] [-H ADDR] [-p PORT] -s FILEPATH [-n FILENAME] (-t | -w | -g PROTOCOL)`
+`$ python3 ./upload-file [-h] [-v | -q] [-H ADDR] [-p PORT] -s FILEPATH [-n FILENAME] (-t | -w | -g PROTOCOL)`
 
 Pueden utilizarse distintos flags:
 
@@ -42,9 +42,9 @@ Pueden utilizarse distintos flags:
 
 ### download-file
 
-Para correr este módulo, ejecutar:
+Para correr este módulo, ejecutar en el directorio del archivo _download-file.py_:
 
-`$ python3 download-file [-h] [-v | -q] [-H ADDR] [-p PORT] [-d FILEPATH] -n FILENAME (-t | -w | -g PROTOCOL)`
+`$ python3 ./download-file [-h] [-v | -q] [-H ADDR] [-p PORT] [-d FILEPATH] -n FILENAME (-t | -w | -g PROTOCOL)`
 
 Pueden utilizarse distintos flags:
 
