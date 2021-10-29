@@ -2,7 +2,7 @@
 
 Este documento contiene instrucciones de cómo ejecutar el cliente y el servidor.
 
-### Servidor
+## Servidor
 
 El servidor consta de un sólo comando `start-server`, que permite iniciar el servidor. Para correrlo, ejecutar en el directorio del archivo start-server.py:
 
@@ -10,9 +10,9 @@ El servidor consta de un sólo comando `start-server`, que permite iniciar el se
 
 Pueden utilizarse distintos flags:
 
-    `-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
-    `-v` , `--verbose` | `-q` , `--quiet` muestra detalles extra sobre el envío de archivos.
-    `-H` , `--host` permite indicar el host donde se quiere levantar el servidor.
+`-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
+`-v` , `--verbose` | `-q` , `--quiet` muestra detalles extra sobre el envío de archivos.
+   `-H` , `--host` permite indicar el host donde se quiere levantar el servidor.
     `-p` , `--port` permite indicar el puerto donde se quiere levantar el servidor.
     `-s` , `--storage` permite indicar el directorio donde se quieren bajar los archivos.
     `-t`, `--tcp` | `-w`, `--saw` | `-g`, `--gbn` permite elegir el protocolo de capa de transporte.
@@ -32,7 +32,7 @@ Para correr este módulo, ejecutar:
 
 Pueden utilizarse distintos flags:
 
-    `-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
+   `-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
     `-v` , `--verbose` | `-q` , `--quiet` muestra detalles extra sobre el envío de archivos.
     `-H` , `--host` permite indicar el host donde se quiere levantar el cliente.
     `-p` , `--port` permite indicar el puerto donde se quiere levantar el cliente.
@@ -48,7 +48,7 @@ Para correr este módulo, ejecutar:
 
 Pueden utilizarse distintos flags:
 
-    `-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
+   `-h` , `--help` permite mostrar el mensaje de ayuda y detalle de los distintos flags.
     `-v` , `--verbose` | `-q` , `--quiet` muestra detalles extra sobre el envío de archivos.
     `-H` , `--host` permite indicar el host donde se quiere levantar el cliente.
     `-p` , `--port` permite indicar el puerto donde se quiere levantar el cliente.
