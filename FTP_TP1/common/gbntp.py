@@ -12,7 +12,6 @@ class GBNTP:
     def __init__(self, socket):
         self.sender_base = 1
         self.sender_seq_num = 1
-        self.time_started = []
         self.not_acknowledged = []
         self.socket = socket
         self.receiver_seqnum = 1
@@ -35,18 +34,12 @@ class GBNTP:
     def get_offset(self):
         return (self.sender_seq_num - self.sender_base)%self.MAX_SEQ_NUM
 
-    def update_state(self, seq_num_received):
+    def update_state(self, seq_num_received, start):
         # Clean all the packets acknowledged and their timers
-        self.timeout.calculateTimeout(
-            now() - 
-            self.time_started[
-                (seq_num_received - self.sender_base)%self.MAX_SEQ_NUM
-            ]
-        )
+        self.timeout.calculateTimeout(now() - start)
 
         for _ in range((seq_num_received - self.sender_base + 1)%self.MAX_SEQ_NUM):
             self.not_acknowledged.pop(0)
-            self.time_started.pop(0)
 
         self.sender_base = (seq_num_received + 1)%self.MAX_SEQ_NUM
 
@@ -61,9 +54,8 @@ class GBNTP:
         sent = 0
         print("Envio un pedazo:")
         print(data)
-
+        start = 0
         if self.send_in_window():
-        # if len(self.not_acknowledged) < self.WINDOW_SIZE:
             print("numero de sequencia enviando")
             print(self.sender_seq_num)
             self.not_acknowledged.append(
@@ -72,13 +64,15 @@ class GBNTP:
             sent = self.socket.sendto(
                 self.not_acknowledged[self.get_offset()], (host, port)
             )
-            self.time_started.append(now())
+            if self.sender_seq_num == self.sender_base:
+                start = now()
+
             self.sender_seq_num = self.next(self.sender_seq_num)
         else:
             advanced = False
             while not advanced:
                 try:
-                    timeout = self.timeout.getTimeout() - (now() - self.time_started[0])
+                    timeout = self.timeout.getTimeout() - (now() - start)
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -101,14 +95,14 @@ class GBNTP:
                                     self.sender_base + self.WINDOW_SIZE):
                         continue
 
-                    self.update_state(seq_num_received)
+                    self.update_state(seq_num_received, start)
+                    start = now()
                     advanced = True
 
                 except socket.timeout:
                     self.timeout.timeout()
-                    self.time_started.clear()
+                    start = now()
                     for p in self.not_acknowledged:
-                        self.time_started.append(now())
                         self.socket.sendto(p, (host, port))
 
             sent = self._send_a_packet(data, host, port, last_send)
@@ -121,7 +115,7 @@ class GBNTP:
                 print("tamaño")
                 print(len(self.not_acknowledged))
                 try:
-                    timeout = self.timeout.getTimeout() - (now() - self.time_started[0])
+                    timeout = self.timeout.getTimeout() - (now() - start)
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -144,15 +138,15 @@ class GBNTP:
                                     self.sender_base + self.WINDOW_SIZE):
                         continue
 
-                    self.update_state(seq_num_received)
+                    self.update_state(seq_num_received, start)
+                    start = now()
                 except socket.timeout:
                     self.timeout.timeout()
                     print("Reenviando paquetes")
-                    self.time_started.clear()
+                    start = now()
                     for p in self.not_acknowledged:
                         print("Reenviando paquet")
                         print(p)
-                        self.time_started.append(now())
                         self.socket.sendto(p, (host, port))
 
         return sent
@@ -193,7 +187,7 @@ class GBNTP:
             print("numero de sequencia esperado")
             print(self.receiver_seqnum)
 
-            if seq_num_received == self.receiver_seqnum and len(data_received) == buffsize:
+            if seq_num_received == self.receiver_seqnum:
                 pkt = self.__pack(self.receiver_seqnum, b'')
                 self.socket.sendto(pkt, source)
                 self.receiver_seqnum = self.next(self.receiver_seqnum)
@@ -203,7 +197,7 @@ class GBNTP:
                 print(self.prev(self.receiver_seqnum))
                 pkt = self.__pack(self.prev(self.receiver_seqnum), b'')
                 self.socket.sendto(pkt, source)
-        
+
         return data_received, source
 
     def recv(self, buffsize):
