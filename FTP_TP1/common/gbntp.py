@@ -83,6 +83,8 @@ class GBNTP:
                     print(seq_num_received)
                     print("base actual")
                     print(self.sender_base)
+                    # Border cases: partial window at the end
+                    # and at the beginning
                     if self.sender_base + self.WINDOW_SIZE >= \
                             self.MAX_SEQ_NUM and seq_num_received < \
                                 self.sender_base and seq_num_received > \
