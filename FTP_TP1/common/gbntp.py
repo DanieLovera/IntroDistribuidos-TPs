@@ -144,6 +144,9 @@ class GBNTP:
                 last_send
             )
 
+        self.time_started = []
+        self.not_acknowledged = []
+        self.sender_base = 1
         return sent
 
     def _recv(self, buffsize):
