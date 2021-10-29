@@ -63,6 +63,7 @@ class GBNTP:
         print(data)
 
         if self.send_in_window():
+        # if len(self.not_acknowledged) < self.WINDOW_SIZE:
             print("numero de sequencia enviando")
             print(self.sender_seq_num)
             self.not_acknowledged.append(
@@ -86,7 +87,18 @@ class GBNTP:
                     seq_num_received, _ = self.__unpack(pkt_received)
                     print("numero de secuencia recivido")
                     print(seq_num_received)
-                    if seq_num_received < self.sender_base:
+                    print("base actual")
+                    print(self.sender_base)
+                    if self.sender_base + self.WINDOW_SIZE >= \
+                            self.MAX_SEQ_NUM and seq_num_received < \
+                                self.sender_base and seq_num_received > \
+                                    (self.sender_base + self.WINDOW_SIZE) \
+                                        % self.MAX_SEQ_NUM:
+                        continue
+                    elif self.sender_base + self.WINDOW_SIZE < \
+                            self.MAX_SEQ_NUM and (seq_num_received <
+                                self.sender_base or seq_num_received >
+                                    self.sender_base + self.WINDOW_SIZE):
                         continue
 
                     self.update_state(seq_num_received)
@@ -118,7 +130,18 @@ class GBNTP:
                     seq_num_received, _ = self.__unpack(pkt_received)
                     print("numero de secuencia recivido")
                     print(seq_num_received)
-                    if seq_num_received < self.sender_base:
+                    print("base actual")
+                    print(self.sender_base)
+                    if self.sender_base + self.WINDOW_SIZE >= \
+                            self.MAX_SEQ_NUM and seq_num_received < \
+                                self.sender_base and seq_num_received > \
+                                    (self.sender_base + self.WINDOW_SIZE) \
+                                        % self.MAX_SEQ_NUM:
+                        continue
+                    elif self.sender_base + self.WINDOW_SIZE < \
+                            self.MAX_SEQ_NUM and (seq_num_received <
+                                self.sender_base or seq_num_received >
+                                    self.sender_base + self.WINDOW_SIZE):
                         continue
 
                     self.update_state(seq_num_received)
