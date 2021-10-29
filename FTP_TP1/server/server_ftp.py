@@ -1,6 +1,7 @@
 import enum
 import os
 import sys
+import threading
 import struct
 
 script_dir = os.path.dirname(__file__)
@@ -17,8 +18,6 @@ class Opcode(enum.IntEnum):
     DOWNLOAD = 1
     EOF = 2
     NEOF = 3
-    # LISTAR = 4
-    # CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
 
 class ServerFTP:
@@ -80,10 +79,13 @@ class ServerFTP:
         print("Archivo recibido.")
 
     def __handle_upload_request(self, store_path: str):
+        sem = threading.Semaphore()
+        sem.acquire()
         fname = self.__recv_fname()
         path = store_path + "/" + fname
         with open(path, "wb") as file:
             self.__recv_file(file)
+        sem.release()
 
     def __handle_download_request(self, store_path: str):
         fname = self.__recv_fname()
