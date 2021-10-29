@@ -59,12 +59,8 @@ class GBNTP:
 
     def _send_a_packet(self, data: bytearray, host, port, last_send: bool):
         sent = 0
-        print("Envio un pedazo:")
-        print(data)
         start = 0
         if self.send_in_window():
-            print("numero de sequencia enviando")
-            print(self.sender_seq_num)
             self.not_acknowledged.append(
                 self.__pack(self.sender_seq_num, self.TYPE_DATA, data)
             )
@@ -88,10 +84,6 @@ class GBNTP:
                         self.SEQ_NUM_SIZE + self.DATA_SIZE)
                     seq_num_received, type_data, _ = self.__unpack(
                         pkt_received)
-                    print("numero de secuencia recivido")
-                    print(seq_num_received)
-                    print("base actual")
-                    print(self.sender_base)
 
                     # We expect only acks
                     if type_data == self.TYPE_DATA:
@@ -126,11 +118,8 @@ class GBNTP:
         # Ensure all the data had been sent to destination
         # because there won't be more send
         if last_send:
-            print("-----------Ultimo envio-----------")
             timeouts = 0
             while not len(self.not_acknowledged) == 0:
-                print("tamaño")
-                print(len(self.not_acknowledged))
                 try:
                     timeout = self.timeout.getTimeout() - (now() - start)
                     if timeout <= 0:
@@ -141,10 +130,6 @@ class GBNTP:
                         self.SEQ_NUM_SIZE + self.DATA_SIZE)
                     seq_num_received, type_data, _ = self.__unpack(
                         pkt_received)
-                    print("numero de secuencia recivido")
-                    print(seq_num_received)
-                    print("base actual")
-                    print(self.sender_base)
                     # We expect only acks
                     if type_data == self.TYPE_DATA:
                         continue
@@ -167,13 +152,10 @@ class GBNTP:
                     start = now()
                 except socket.timeout:
                     self.timeout.timeout()
-                    print("Reenviando paquetes")
                     start = now()
                     if last_send:
                         timeouts += 1
                     for p in self.not_acknowledged:
-                        print("Reenviando paquet")
-                        print(p)
                         self.socket.sendto(p, (host, port))
 
                 # If the last ack is lost
@@ -183,8 +165,6 @@ class GBNTP:
         return sent
 
     def send(self, data: bytes, host, port):
-        print("Quiero enviar")
-        print(data)
         _data = bytearray(data)
         sent = 0
 
@@ -192,7 +172,6 @@ class GBNTP:
             last_send = False
 
             if i + self.MAX_DATAGRAM_SIZE > len(_data):
-                print("Ultimo pedazo")
                 last_send = True
 
             sent += self._send_a_packet(
@@ -206,8 +185,6 @@ class GBNTP:
         return sent
 
     def _recv(self, buffsize):
-        print("quiero recibir en pedazo estos bytes:")
-        print(buffsize)
         correct_seq_numb = False
         while not correct_seq_numb:
             pkt_received, source = self.socket.recvfrom(
@@ -215,10 +192,6 @@ class GBNTP:
             seq_num_received, type_data, data_received = self.__unpack(
                 pkt_received)
 
-            print("numero de sequencia recibido")
-            print(seq_num_received)
-            print("numero de sequencia esperado")
-            print(self.receiver_seqnum)
 
             # We expect only data
             if type_data == self.TYPE_ACK:
@@ -230,8 +203,6 @@ class GBNTP:
                 self.receiver_seqnum = self.next(self.receiver_seqnum)
                 correct_seq_numb = True
             else:
-                print("Reenviando el ack")
-                print(self.prev(self.receiver_seqnum))
                 pkt = self.__pack(
                     self.prev(self.receiver_seqnum), self.TYPE_ACK, b'')
                 self.socket.sendto(pkt, source)
@@ -239,18 +210,10 @@ class GBNTP:
         return data_received, source
 
     def recv(self, buffsize):
-        print("quiero recibir estos bytes:")
-        print(buffsize)
         data = []
         for i in range(0, buffsize, self.MAX_DATAGRAM_SIZE):
-            print("-------Iteracion numero-------")
-            print(i)
             d, s = self._recv(min(self.MAX_DATAGRAM_SIZE, buffsize - i))
-            print("data")
-            print(d)
             data.append(d)
 
         data = b''.join(data)
-        print("received")
-        print(data)
         return data, s

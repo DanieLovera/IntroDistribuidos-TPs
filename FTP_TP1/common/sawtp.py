@@ -34,8 +34,6 @@ class SAWTP:
         start = now()
         acknowledged = False
         timeouts = 0
-        if last_send:
-            print("----Last send----")
         while not acknowledged:
             try:
                 timeout = self.timeout.getTimeout() - (now() - start)
@@ -43,10 +41,6 @@ class SAWTP:
                 pkt_received, _ = self.socket.recvfrom(self.SEQ_NUM_SIZE)
                 seq_num_received, _ = self.__unpack(pkt_received)
 
-                print("waiting:")
-                print(self.sender_seqnum)
-                print("received:")
-                print(seq_num_received)
                 if seq_num_received == self.sender_seqnum:
                     self.timeout.calculateTimeout(now() - start)
                     self.socket.settimeout(None)
@@ -56,7 +50,6 @@ class SAWTP:
             except socket.timeout:
                 if last_send:
                     timeouts += 1
-                print("timeout")
                 self.timeout.timeout()
                 sent = self.socket.sendto(pkt, (host, port))
                 start = now()
@@ -90,20 +83,11 @@ class SAWTP:
 
     def _recv(self, buffsize):
         correct_seq_numb = False
-        print("-----chunks-----")
-        print(buffsize)
         while not correct_seq_numb:
             pkt_received, source = self.socket.recvfrom(
                 buffsize + self.SEQ_NUM_SIZE)
             seq_num_received, data_received = self.__unpack(pkt_received)
 
-            print("pkt:")
-            print(pkt_received)
-            print("waiting:")
-            print(self.receiver_seqnum)
-            print("seq num received:")
-            print(seq_num_received)
-            print(data_received)
             if seq_num_received == self.receiver_seqnum:
                 pkt = self.__pack(self.receiver_seqnum, b'')
                 self.socket.sendto(pkt, source)
@@ -116,16 +100,10 @@ class SAWTP:
         return data_received, source
 
     def recv(self, buffsize):
-        print("quiero recibir estos bytes:")
-        print(buffsize)
         data = []
         for i in range(0, buffsize, self.MAX_DATAGRAM_SIZE):
-            print("-------Iteracion numero-------")
-            print(i)
             d, s = self._recv(min(self.MAX_DATAGRAM_SIZE, buffsize - i))
             data.append(d)
 
         data = b''.join(data)
-        print("received")
-        print(data)
         return data, s

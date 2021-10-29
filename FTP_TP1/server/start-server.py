@@ -49,9 +49,7 @@ def parseArguments(parser):
 def cleanDeadClients(threads):
     for thread in threads:
         if not thread.is_alive():
-            # print(threading.active_count())
             thread.join()
-            # print(threading.active_count())
 
 
 def start_peer(peer, storage_path, verbose):
@@ -82,7 +80,6 @@ def main():
             listener.listen(MAX_CONNECTIONS)
             while True:
                 peer = listener.accept()
-                print("arranque el theard")
                 t = threading.Thread(
                     target=start_peer, args=(peer, storage_path, args.verbose)
                 )

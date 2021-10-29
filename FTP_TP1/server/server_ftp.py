@@ -59,7 +59,6 @@ class ServerFTP:
         self.commProtocol.send(chunk)
 
     def __send_file(self, file):
-        print("Enviando archivo.")
         chunk = file.read(self.CHUNK_SIZE)
         while chunk:
             if self.verbose:
@@ -67,16 +66,13 @@ class ServerFTP:
                       str(os.stat(file.fileno()).st_size))
             self.__send_chunk(chunk)
             chunk = file.read(self.CHUNK_SIZE)
-        print("Archivo enviado.")
 
     def __recv_file(self, file):
-        print("Recibiendo archivo.")
         sopcode = self.__recv_opcode()
         while sopcode != Opcode.EOF:
             chunk = self.commProtocol.recv()
             file.write(chunk)
             sopcode = self.__recv_opcode()
-        print("Archivo recibido.")
 
     def __handle_upload_request(self, store_path: str):
         sem = threading.Semaphore()

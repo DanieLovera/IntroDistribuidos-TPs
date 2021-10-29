@@ -17,8 +17,6 @@ class Opcode(enum.IntEnum):
     DOWNLOAD = 1
     EOF = 2
     NEOF = 3
-    #LISTAR = 4
-    # CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
 
 class ClientFTP:
@@ -32,20 +30,16 @@ class ClientFTP:
 
     # RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA LECTURA!
     def upload_file(self, file, fname):
-        print("Enviando archivo.")
         self.__send_opcode(Opcode.UPLOAD)
         self.__send_fname(fname)
         self.__send_file(file)
         self.__send_opcode(Opcode.EOF)
-        print("Archivo enviado.")
 
     # RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
     def download_file(self, file, fname):
-        print("Recibiendo archivo.")
         self.__send_opcode(Opcode.DOWNLOAD)
         self.__send_fname(fname)
         self.__recv_file(file)
-        print("Archivo recibido.")
 
     def __send_opcode(self, opcode: Opcode):
         sopcode = int(opcode)
