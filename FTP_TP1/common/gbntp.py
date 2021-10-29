@@ -8,7 +8,7 @@ class GBNTP:
     SEQ_NUM_SIZE = 1
     WINDOW_SIZE = 4
     MAX_SEQ_NUM = 2 * WINDOW_SIZE
-    MAX_DATAGRAM_SIZE = 20    # 64kb
+    MAX_DATAGRAM_SIZE = 64000    # 64kb
     MAX_TIMEOUTS = 6
     TYPE_DATA = b'd'
     TYPE_ACK = b'a'

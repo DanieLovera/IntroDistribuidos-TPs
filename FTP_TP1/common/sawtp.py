@@ -102,6 +102,7 @@ class SAWTP:
             print(self.receiver_seqnum)
             print("seq num received:")
             print(seq_num_received)
+            print(data_received)
             if seq_num_received == self.receiver_seqnum:
                 pkt = self.__pack(self.receiver_seqnum, b'')
                 self.socket.sendto(pkt, source)
