@@ -5,7 +5,6 @@ from time import perf_counter as now
 
 class GBNTP:
     SEQ_NUM_SIZE = 1
-    #RTT = 1
     WINDOW_SIZE = 4
     MAX_SEQ_NUM = 2 * WINDOW_SIZE
     MAX_DATAGRAM_SIZE = 64000    # 64kb
@@ -117,6 +116,7 @@ class GBNTP:
                         continue
 
                     self.update_state(seq_num_received)
+                    self.timeout.calculateTimeout(now() - self.time_started[0])
                 except socket.timeout:
                     self.timeout.timeout()
                     # print("Reenviando paquetes")
