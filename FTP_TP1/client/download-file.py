@@ -9,6 +9,7 @@ sys.path.append(myModule_dir)
 from socket_tcp import SocketTCP
 from socket_udp import SocketUDP
 
+
 def parseArguments(parser):
     group = parser.add_mutually_exclusive_group(required=False)
 
@@ -34,6 +35,26 @@ def parseArguments(parser):
 
     parser.add_argument('-n', '--name', type=str, default='archivo',
                         required=True, help='file name', dest='filename')
+
+    transportProtocol = parser.add_mutually_exclusive_group(required=True)
+
+    transportProtocol.add_argument('-t', '--tcp', const='tcp',
+                                   required=False,
+                                   help='send file over TCP protocol',
+                                   dest='protocol', action='store_const')
+
+    transportProtocol.add_argument('-w', '--saw', const='saw',
+                                   required=False,
+                                   help='send file over UDP protocol' +
+                                   '(Stop-and-Wait)',
+                                   dest='protocol', action='store_const')
+
+    transportProtocol.add_argument('-g', '--gbn', const='gbn',
+                                   required=False,
+                                   help='send file over UDP protocol' +
+                                   '(Go-Back-N)',
+                                   dest='protocol', action='store_const')
+
 
 def main():
     parser = argparse.ArgumentParser(description='Solicita y recibe un archivo del servidor')
@@ -61,6 +82,30 @@ def main():
 
             with open((fpath + "/" + fname), "wb") as file:
                 ftp.download_file(file, fname)
+
+
+    # descomentar cuando este bien
+    # if args.protocol == "tcp":
+    #     # with SocketTCP() as peer:
+    #         peer.connect(host, port)
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open((fpath + "/" + fname), "wb") as file:
+    #            ftp.download_file(file, fname)
+
+    # elif protocol == "saw":
+    #     with SocketUDP(host, port) as peer:
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open((fpath + "/" + fname), "wb") as file:
+    #            ftp.download_file(file, fname)
+
+    # else:
+    #    with SocketUDP(host, port) as peer:
+    #         ftp = ClientFTP(peer, args.verbose)
+
+    #         with open((fpath + "/" + fname), "wb") as file:
+    #            ftp.download_file(file, fname)
 
 
 if __name__ == "__main__":

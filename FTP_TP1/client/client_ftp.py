@@ -9,6 +9,7 @@ sys.path.append(mymodule_dir)
 from comm_protocol import CommProtocol
 from socket_interface import ISocket
 
+
 @enum.unique
 class Opcode(enum.IntEnum):
 	UPLOAD = 0
@@ -18,6 +19,7 @@ class Opcode(enum.IntEnum):
 	#LISTAR = 4
 	#CUALQUIER OTRO COMANDO QUE HAGA FALTA
 
+
 class ClientFTP:
 	FORMAT = "H"
 	CHUNK_SIZE = 1024 * 1024
@@ -25,19 +27,24 @@ class ClientFTP:
 	def __init__(self, socket: ISocket):
 		self.socket = socket
 		self.commProtocol = CommProtocol(socket)
+		# self.verbose = verbose
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA LECTURA!
 	def upload_file(self, file, fname):
+		# print("Enviando archivo.")
 		self.__send_opcode(Opcode.UPLOAD)
 		self.__send_fname(fname)
 		self.__send_file(file)
 		self.__send_opcode(Opcode.EOF)
+		# print("Archivo enviado.")
 
 	# RECIBE UN ARCHIVO BINARIO ABIERTOOOO PARA ESCRITURA!
 	def download_file(self, file, fname):
+		# print("Recibiendo archivo.")
 		self.__send_opcode(Opcode.DOWNLOAD)
 		self.__send_fname(fname)
 		self.__recv_file(file)
+		# print("Archivo recibido.")
 
 	def __send_opcode(self, opcode: Opcode):
 		sopcode = int(opcode)
@@ -62,6 +69,9 @@ class ClientFTP:
 	def __send_file(self, file):
 		chunk = file.read(self.CHUNK_SIZE)
 		while chunk:
+			# if self.verbose:
+      #   print("Enviados " + str(file.tell()) + " bytes de " +
+      #         str(os.stat(file.fileno()).st_size))
 			self.__send_chunk(chunk)
 			chunk = file.read(self.CHUNK_SIZE)
 
