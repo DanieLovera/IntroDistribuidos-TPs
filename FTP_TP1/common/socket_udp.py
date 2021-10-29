@@ -28,9 +28,6 @@ class SocketUDP(ISocket):
         self.__protocol.send(data, self.__host, self.__port)
 
     def recv(self, bufsize: int):
-        #data, _ = self.__protocol.recv(bufsize)
-        #return data
-
         data, source = self.__protocol.recv(bufsize)
         self.__host = source[0]
         self.__port = source[1]
