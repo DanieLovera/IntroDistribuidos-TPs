@@ -19,6 +19,7 @@ class GBNTP:
         self.not_acknowledged = []
         self.socket = socket
         self.receiver_seqnum = 1
+        self.start = 0
         self.timeout = Timer()
 
     def next(self, seq_number):
@@ -59,7 +60,6 @@ class GBNTP:
 
     def _send_a_packet(self, data: bytearray, host, port, last_send: bool):
         sent = 0
-        start = 0
         if self.send_in_window():
             self.not_acknowledged.append(
                 self.__pack(self.sender_seq_num, self.TYPE_DATA, data)
@@ -68,14 +68,14 @@ class GBNTP:
                 self.not_acknowledged[self.get_offset()], (host, port)
             )
             if self.sender_seq_num == self.sender_base:
-                start = now()
+                self.start = now()
 
             self.sender_seq_num = self.next(self.sender_seq_num)
         else:
             advanced = False
             while not advanced:
                 try:
-                    timeout = self.timeout.getTimeout() - (now() - start)
+                    timeout = self.timeout.getTimeout() - (now() - self.start)
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -103,13 +103,14 @@ class GBNTP:
                                                   self.sender_base + self.WINDOW_SIZE):
                         continue
 
-                    self.update_state(seq_num_received, start)
-                    start = now()
+                    self.update_state(seq_num_received, self.start)
+                    self.start = now()
                     advanced = True
 
                 except socket.timeout:
+                    print("timeout")
                     self.timeout.timeout()
-                    start = now()
+                    self.start = now()
                     for p in self.not_acknowledged:
                         self.socket.sendto(p, (host, port))
 
@@ -121,7 +122,7 @@ class GBNTP:
             timeouts = 0
             while not len(self.not_acknowledged) == 0:
                 try:
-                    timeout = self.timeout.getTimeout() - (now() - start)
+                    timeout = self.timeout.getTimeout() - (now() - self.start)
                     if timeout <= 0:
                         raise socket.timeout
 
@@ -148,11 +149,12 @@ class GBNTP:
                         timeouts = 0
                         continue
 
-                    self.update_state(seq_num_received, start)
-                    start = now()
+                    self.update_state(seq_num_received, self.start)
+                    self.start = now()
                 except socket.timeout:
+                    print("timeout")
                     self.timeout.timeout()
-                    start = now()
+                    self.start = now()
                     if last_send:
                         timeouts += 1
                     for p in self.not_acknowledged:
@@ -182,6 +184,7 @@ class GBNTP:
             )
 
         self.socket.settimeout(None)
+        self.start = 0
         return sent
 
     def _recv(self, buffsize):
